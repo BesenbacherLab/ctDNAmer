@@ -1,7 +1,7 @@
 __use_yte__: true
 __definitions__:
     - import os
-    - account = "c2i-colon" #os.environ['ACCOUNT_NAME']
+    - account = os.environ['ACCOUNT_NAME']
 executor: slurm
 latency-wait: 60
 max-jobs-per-second: 800
