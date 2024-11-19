@@ -1,0 +1,17 @@
+__use_yte__: true
+__definitions__:
+    - import os
+    - account = "c2i-colon" #os.environ['ACCOUNT_NAME']
+executor: slurm
+latency-wait: 60
+max-jobs-per-second: 800
+jobs: 800
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+software-deployment-method: "conda"
+
+default-resources:
+    slurm_account: ?account
+    mem_mb: 1000
+    runtime: 60

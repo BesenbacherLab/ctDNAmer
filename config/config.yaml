@@ -1,0 +1,9 @@
+samples: config/samples.tsv
+samples_glu: config/samples_glu.tsv
+samples_cfDNA: config/units.tsv
+donors: config/donors.tsv
+
+k: 51
+gc_lower: 20
+gc_upper: 80
+tumor_fileformat: "fastq"

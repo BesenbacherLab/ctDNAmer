@@ -1,0 +1,101 @@
+
+
+include: "rules/common.smk"
+OUTPUT_C = []
+
+# Germline union (GLU) output
+GLU_KMERS_SUMMARIES = expand(
+    "results/germline_union/{glu_type}/{glu_sample}/kmers_count_sum_0rm.txt", zip, 
+    glu_type = samples_glu.data_type.tolist(), glu_sample = samples_glu.index.tolist()
+    )
+GLU_SUMMARIES = expand(
+    "results/germline_union/germline_union_{glu_samples_comb}_count_sum_0rm.txt", 
+    glu_samples_comb=glu_combinations[:-1]
+    )
+GLU_FINAL = expand(
+    "results/germline_union/final_germline_union_{glu_samples_comb_last}.kmc_pre", 
+    glu_samples_comb_last=glu_combinations[-1]
+    )
+GLU_FINAL_SUMMARY = expand(
+    "results/germline_union/final_germline_union_{glu_samples_comb_last}_count_sum_0rm.txt", 
+    glu_samples_comb_last=glu_combinations[-1]
+    )
+
+OUTPUT_C.extend(GLU_KMERS_SUMMARIES+GLU_SUMMARIES+GLU_FINAL+GLU_FINAL_SUMMARY)
+
+# unique tumor output
+GL_SUMMARIES = expand(
+    "results/patients/{pt}/germline/kmers_count_sum_0rm.txt",
+    pt=samples.index.tolist()
+    )
+TUMOR_MEAN = expand(
+    "results/patients/{pt}/tumor/signal_mean_count.csv",
+    pt=samples.index.tolist()
+    )
+T_SUB_INDGL_SUMMARIES = expand(
+    "results/patients/{pt}/unique_tumor/tumor_sub_indGL_count_sum_0rm.txt",
+    pt=samples.index.tolist()
+    )
+UT_SUMMARIES = expand(
+    "results/patients/{pt}/unique_tumor/UT_count_sum_0rm.txt",
+    pt=samples.index.tolist()
+    )
+UT_FILTERED_SORTED = expand(
+    "results/patients/{pt}/unique_tumor/UT_filtered_sorted.txt",
+    pt=samples.index.tolist()
+    )
+OUTPUT_C.extend(GL_SUMMARIES+TUMOR_MEAN+T_SUB_INDGL_SUMMARIES+UT_SUMMARIES+UT_FILTERED_SORTED)
+
+# emporical noise output
+DONOR_MEAN = expand(
+    "results/donors/{donor}/mean_count.csv", 
+    donor=donors.index.tolist()
+    )
+EMP_NOISE = expand(
+    "results/patients/{pt}/empirical_noise/estimates.csv",
+    pt=samples.index.tolist()
+    )
+OUTPUT_C.extend(DONOR_MEAN+EMP_NOISE)
+
+# cfDNA output
+CFDNA_MEAN = expand(
+    "results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNc_mean.csv", zip, 
+    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
+    )
+CFDNA_MEAN_GC = expand(
+    "results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv", zip, 
+    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
+    )
+OUTPUT_C.extend(CFDNA_MEAN+CFDNA_MEAN_GC)
+
+# ut annotation output
+UT_ANNOT_CFDNA = expand(
+    "results/patients/{pt}/{cfDNA_ID}/UT_cfDNA_annotation.txt", zip, 
+    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
+    )
+OUTPUT_C.extend(UT_ANNOT_CFDNA)
+
+# modeling output
+PREOP_TF = expand(
+    "results/patients/{pt}/{preop_cfDNA_ID}/tf_estimation/3cat/preop_tf_estimate.csv", zip, 
+    pt=preop_units.sample_ID.tolist(), preop_cfDNA_ID=preop_units.index.tolist()
+    )
+POSTOP_TF = expand(
+    "results/patients/{pt}/{postop_cfDNA_ID}/tf_estimation/3cat/postop_tf_estimate.csv", zip,
+    pt=postop_units.sample_ID.tolist(), postop_cfDNA_ID=postop_units.index.tolist()
+    )
+OUTPUT_C.extend(PREOP_TF+POSTOP_TF)
+
+##### Target rules #####
+rule all:
+    input:
+        OUTPUT_C
+
+
+##### Modules #####
+include: "rules/germline_union.smk"
+include: "rules/unique_tumor.smk"
+include: "rules/empirical_noise.smk"
+include: "rules/cfDNA.smk"
+include: "rules/ut_annotation.smk"
+include: "rules/TF_modeling.smk"
