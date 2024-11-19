@@ -16,3 +16,8 @@ workflow/scripts/.ipynb_checkpoints/**
 .test/resources/**
 .test/results/**
 .test/report.html
+workflow/scripts/models/empirical_noise.rds
+workflow/scripts/models/tf_postop_2cat.rds
+workflow/scripts/models/tf_postop_3cat.rds
+workflow/scripts/models/tf_preop_2cat.rds
+workflow/scripts/models/tf_preop_3cat.rds
