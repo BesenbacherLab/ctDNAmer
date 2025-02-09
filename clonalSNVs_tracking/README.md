@@ -3,16 +3,16 @@
 This workflow estimates circulating tumor fraction from algined cfDNA WGS data based on clonal SNVs allele frequencies. The clonal SNVs are identified from the aligned primary tumor WGS data, quality filtered and then tracked in the cfDNA samples. 
 
 ## Description
-The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33)[1]. 
+The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33) [1]. 
 
 This workflow first identifies clonal SNVs from primary tumor data and then tracks these SNVs in the cfDNA by following these main steps:
-1) Input Mutect2[2] calls filtering with vcftools to retain only SNV variants (indels removed) with PASS FILTER flag, located on autosomes or allosomes. 
-2) Variant annotation with Ensembl[Variant Effect Predictor (VEP)](https://www.ensembl.org/info/docs/tools/vep/index.html)[3]. Variants in coding regions with a "high" impact annotation are marked as (potential) drivers. 
-3) Calling Copy Number Alterations with the [Sequenza toolset](https://sequenzatools.bitbucket.io/#/home)[4].
-4) Quality control of the SNVs, CNAs, tumor purity and ploidy estimates using [CNAqc](https://caravagnalab.github.io/CNAqc/)[5].
+1) Input Mutect2 [2] calls filtering with vcftools to retain only SNV variants (indels removed) with PASS FILTER flag, located on autosomes or allosomes. 
+2) Variant annotation with Ensembl [Variant Effect Predictor (VEP)](https://www.ensembl.org/info/docs/tools/vep/index.html) [3]. Variants in coding regions with a "high" impact annotation are marked as (potential) drivers. 
+3) Calling Copy Number Alterations with the [Sequenza toolset](https://sequenzatools.bitbucket.io/#/home) [4].
+4) Quality control of the SNVs, CNAs, tumor purity and ploidy estimates using [CNAqc](https://caravagnalab.github.io/CNAqc/) [5].
 5) Selecting SNVs in diploid heterozygous (1:1) copy number states.
 6) Removing outlier SNVs based on VAF distribution. 
-7) Finding clonal mutations (seperation from noise and passenger variants at lower frequencies) with [MOBSTER](https://caravagnalab.github.io/mobster/)[6]. 
+7) Finding clonal mutations (seperation from noise and passenger variants at lower frequencies) with [MOBSTER](https://caravagnalab.github.io/mobster/) [6]. 
 8) Quality filtering the clonal SNVs based on primary tumor alignment information (looking at sequencing and alignment quality at both read and position level).
 9) Tracking the clonal SNVs in cfDNA (includes quality filters on the cfDNA alignment).
 10) Calculating the mean allele frequency of clonal SNV in cfDNA.
@@ -26,11 +26,11 @@ The workflow requires Snakemake 8.0.0 or above and uses conda for package manage
 
 ### Input data
 
-Patient data can be specified in the ``config/samples.tsv`` configuration file. For each patient, primary tumor and matched germline WGS data BAM files are required along with a variant set called with Mutect2[2]. 
+Patient data can be specified in the ``config/samples.tsv`` configuration file. For each patient, primary tumor and matched germline WGS data BAM files are required along with a variant set called with Mutect2 [2]. 
 ``Samples.tsv`` can also be used to define tumor purity and ploidy ranges for Sequenza and VAF cutoffs for candidate SNVs filtering. The default values for these parameters can be found in the [samples schema](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/workflow/schemas/samples.schema.yaml). 
 
 The ``config/config.yaml`` file specifies the name and FASTA file path of the reference genome where the samples are aligned to. 
-For variant annotation, the workflow uses Ensembl Variant Effect Predictor (VEP)[3]. The transcript models file (cache) needs to be downloaded before using the workflow and the path to the cache needs to be specified in ``config.yaml``.
+For variant annotation, the workflow uses Ensembl Variant Effect Predictor (VEP) [3]. The transcript models file (cache) needs to be downloaded before using the workflow and the path to the cache needs to be specified in ``config.yaml``.
 
 ## Usage
 
@@ -97,8 +97,13 @@ For further options for local, cluster and cloud execution, see the snakemake [d
 
 ## References
 [1] F. Mölder et al., “Sustainable data analysis with Snakemake,” F1000Research, vol. 10, p. 33, Apr. 2021, doi: 10.12688/f1000research.29032.2.
+
 [2] K. Cibulskis et al., “Sensitive detection of somatic point mutations in impure and heterogeneous cancer samples,” Nat. Biotechnol., vol. 31, no. 3, pp. 213–219, Mar. 2013, doi: 10.1038/nbt.2514.
+
 [3] W. McLaren et al., “The Ensembl Variant Effect Predictor,” Genome Biol., vol. 17, no. 1, p. 122, Jun. 2016, doi: 10.1186/s13059-016-0974-4.
+
 [4] F. Favero et al., “Sequenza: allele-specific copy number and mutation profiles from tumor sequencing data,” Ann. Oncol., vol. 26, no. 1, pp. 64–70, Jan. 2015, doi: 10.1093/annonc/mdu479.
+
 [5] A. Antonello et al., “Computational validation of clonal and subclonal copy number alterations from bulk tumor sequencing using CNAqc,” Genome Biol., vol. 25, no. 1, p. 38, Jan. 2024, doi: 10.1186/s13059-024-03170-5.
+
 [6] G. Caravagna et al., “Subclonal reconstruction of tumors by using machine learning and population genetics,” Nat. Genet., vol. 52, no. 9, pp. 898–907, Sep. 2020, doi: 10.1038/s41588-020-0675-5.

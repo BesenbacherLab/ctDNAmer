@@ -7,7 +7,7 @@ ctDNA-mers is a reference-free approach for ctDNA detection that finds tumor-spe
 
 ctDNA-mers leverages genome-wide information and is not limited to SNVs. Probabilistic modeling is used to estimate the circulating tumor fraction. 
 
-The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33)[1]. K-mer counting and k-mer set operations are done by KMC3(https://academic.oup.com/bioinformatics/article/33/17/2759/3796399)[2]. The probablistic models are implemented in STAN (https://mc-stan.org/)[3] and sampling is performed with the rstan package. 
+The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33)[1]. K-mer counting and k-mer set operations are done by [KMC3](https://academic.oup.com/bioinformatics/article/33/17/2759/3796399)[2], probablistic models are implemented in [STAN](https://mc-stan.org/)[3] and sampling is performed with the rstan package. 
 
 Detailed  descripton of ctDNA-mers can be found [here](https://www.biorxiv.org/).
 
@@ -112,5 +112,7 @@ The subworkflow `clonalSNVs_tracking` implements ctDNA detection and TF estimati
 
 ## References
 [1] F. Mölder et al., “Sustainable data analysis with Snakemake,” F1000Research, vol. 10, p. 33, Apr. 2021, doi: 10.12688/f1000research.29032.2.
+
 [2] M. Kokot, M. Długosz, and S. Deorowicz, “KMC 3: counting and manipulating k-mer statistics,” Bioinformatics, vol. 33, no. 17, pp. 2759–2761, Sep. 2017, doi: 10.1093/bioinformatics/btx304.
+
 [3] Stan Development Team, “Stan Modeling Language Users Guide and Reference Manual.” Accessed: Oct. 24, 2024. [Online]. Available: https://mc-stan.org

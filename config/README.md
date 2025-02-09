@@ -36,4 +36,5 @@ At least two cfDNA samples are required per patient for testing: a ctDNA-positiv
 
 ## References
 [1] W. McLaren et al., “The Ensembl Variant Effect Predictor,” Genome Biol., vol. 17, no. 1, p. 122, Jun. 2016, doi: 10.1186/s13059-016-0974-4.
+
 [2] K. Cibulskis et al., “Sensitive detection of somatic point mutations in impure and heterogeneous cancer samples,” Nat. Biotechnol., vol. 31, no. 3, pp. 213–219, Mar. 2013, doi: 10.1038/nbt.2514.
