@@ -7,7 +7,7 @@ ctDNA-mers is a reference-free approach for ctDNA detection that finds tumor-spe
 
 ctDNA-mers leverages genome-wide information and is not limited to SNVs. Probabilistic modeling is used to estimate the circulating tumor fraction. 
 
-The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33)[1]. K-mer counting and k-mer set operations are done by [KMC3](https://academic.oup.com/bioinformatics/article/33/17/2759/3796399)[2], probablistic models are implemented in [STAN](https://mc-stan.org/)[3] and sampling is performed with the rstan package. 
+The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33) [1]. K-mer counting and k-mer set operations are done by [KMC3](https://academic.oup.com/bioinformatics/article/33/17/2759/3796399) [2], probablistic models are implemented in [STAN](https://mc-stan.org/) [3] and sampling is performed with the rstan package. 
 
 Detailed  descripton of ctDNA-mers can be found [here](https://www.biorxiv.org/).
 
