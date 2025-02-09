@@ -1,5 +1,6 @@
-sink(snakemake@log[[1]], append=TRUE)
+sink(snakemake@log[[1]], append=TRUE) # logging
 
+# packages
 library(tidyverse)
 library(coda)
 library(rstan)
@@ -7,105 +8,196 @@ rstan_options(auto_write = TRUE)
 
 ######################### Input #########################
 
-# input models
-post_3cat_mod = snakemake@input[["post_3cat_mod"]]
-post_2cat_mod = snakemake@input[["post_2cat_mod"]] 
+#### input models
+mod = snakemake@input[["mod"]]
 
-# input parameters
+#### input parameters
+
+## general
 gc_lower <- as.integer(snakemake@params[["gc_lower"]])
 gc_upper <- as.integer(snakemake@params[["gc_upper"]])
-wT_mean <- as.numeric(snakemake@params[["wT_mean"]])
-wT_lb <- as.numeric(snakemake@params[["wT_lb"]])
-TF_prior_beta_b <- as.integer(snakemake@params[["TF_prior_beta_b"]])
-gl_comp_mean <- as.numeric(snakemake@params[["gl_comp_mean"]])
+print(paste0("GC content cutoffs: ", gc_lower, ", ", gc_upper))
 
-# germline component weight and variance scaling parameter
+## pre-treatment/baseline (ctDNA-positive) cfDNA sample parameter estimates
 preop_estimates <- read.csv(snakemake@input[["preop_est"]])
+
+## tumor component
+TF_prior_beta_b <- as.integer(snakemake@params[["TF_prior_beta_b"]])
+print(paste0("Tumor fraction prior Beta distribution b parameter (sets the prior sample size): ", TF_prior_beta_b))
+
+wt_prior_n <- 100
+print(paste0("Tumor component weight sample size: ", wt_prior_n))
+
+wt_prior_n_scale <- 1/1
+print(paste0("Tumor component weight sample size scale (used in case the prior sample size is made dependent on input data size with wt_prior_n = n_UT_scale): ", wt_prior_n_scale))
+
+t_phi_lb_scale <- as.numeric(snakemake@params[["t_phi_lb_scale"]])
+print(paste0("Tumor component phi parameter lower bound scaling factor: ", t_phi_lb_scale))
+
+wT_mean = preop_estimates$wt_mean[1]
+print(paste0("Tumor component weight prior mean (baseline cfDNA sample weight estimate): ", wT_mean))
+
+wT_lb = wT_mean/2
+print(paste0("Tumor component weight lower bound (mean between the prior weight mean and 0): ", wT_lb))
+
+## germline component
+gl_comp_mean <- 1/2
+print(paste0("Germline component mean scaling factor: ", gl_comp_mean))
+
+# germline component weight and variance scaling parameter baseline/pre-treatment (ctDNA-positive sample) estimates
 w_gl <- preop_estimates$wgl_mean[1]
-print(paste0("w_gl: ", w_gl))
+print(paste0("Germline component weight: ", w_gl))
 
 gl_phi <- preop_estimates$glphi_mean[1]
-print(paste0("gl_phi: ", gl_phi))
+print(paste0("Germline component phi parameter: ", gl_phi))
 
-# input data - kmers
-f <- snakemake@input[["kmer_data"]]
-data = read.table(f)
-colnames(data) <- c("kmer", "tumor", "gc_content", "cfDNA")
-n_UT <- nrow(data)
-print(paste0("Total number of UT k-mers: ", n_UT))
-
-# input data - cfDNA mean
-f <- snakemake@input[["cfDNA_mean"]]
-cfDNA_mean_count <- read.table(f, header = T, sep = ",") 
-cfDNA_mean_count <- cfDNA_mean_count |> 
-    filter(between(as.numeric(gc_content), gc_lower, gc_upper)) |> 
-    select(gc_content, mean, var)
-print("Head cfDNA mean")
-print(head(cfDNA_mean_count))
-data <- left_join(data, cfDNA_mean_count, by = c("gc_content"))
-
-# input data - noise rate
+# noise component
 f <- snakemake@input[["noise_rate"]]
 noise_est <- read.csv(f)
 noise_mu = noise_est$mean_mu[1]
 noise_phi = noise_est$mean_phi[1]
 print(paste0("Noise rate estimates, mu and phi: ", noise_mu, ", ", noise_phi))
 
-# var = mean + (mean**2)/phi; phi = (mean**2)/(var - mean) --> larger phi, smaller variance, 
-# using cfDNA mean and var for phi lower bound calculation
+
+#### input data
+
+## kmer counts
+f <- snakemake@input[["kmer_data"]]
+data = read.table(f)
+colnames(data) <- c("kmer", "tumor", "gc_content", "cfDNA")
+n_UT <- nrow(data)
+print(paste0("Total number of UT k-mers: ", n_UT))
+
+## set tumor component weight prior sample sample size (scaled accordingly, if dependent on the input data size)
+if (wt_prior_n == "n_UT"){
+    wt_prior_n = n_UT
+} else if (wt_prior_n == "n_UT_scale"){
+    wt_prior_n = round(n_UT*wt_prior_n_scale)
+}
+print(paste0("Tumor component weight prior distribution sample size: ", wt_prior_n))
+n_wt_p = wt_prior_n
+
+## cfDNA mean count
+f <- snakemake@input[["cfDNA_mean"]]
+cfDNA_mean_count <- read.table(f, header = T, sep = ",") 
+cfDNA_mean_count <- cfDNA_mean_count |> 
+    filter(between(as.numeric(gc_content), gc_lower, gc_upper)) |> 
+    select(gc_content, mean, var)
+data <- left_join(data, cfDNA_mean_count, by = c("gc_content"))
+
+# cfDNA maximum mean value across included GC contents]
 cfDNA_max_mean <- cfDNA_mean_count %>% filter(mean == max(mean))
-cfDNA_max_mean_m <- cfDNA_max_mean$mean[1]
-cfDNA_max_mean_v <- cfDNA_max_mean$var[1]
+cfDNA_max_mean_m  <- cfDNA_max_mean$mean[1]
 
-t_phi_lb = (cfDNA_max_mean_m**2)/(cfDNA_max_mean_v-cfDNA_max_mean_m)
-print(paste0("t phi lower bound: ", t_phi_lb)) 
+######################### 3-component mixture model #########################
 
-######################### 3 cat model #########################
-
-# modeling
-set.seed(1)
+# combine input data and parameters
 data_list = list(n = n_UT,
+                 n_wt_p = n_wt_p,
                  noise_mu = noise_mu, 
                  noise_phi = noise_phi,
                  cfDNA_mean = data$mean, 
                  c_cfDNA = data$cfDNA,
-                 max_count_cfDNA_p1 = max(data$cfDNA) + 1, 
+                 max_count_cfDNA_p1 = max(data$cfDNA) + 1,
+                 cfDNA_mean_max = cfDNA_max_mean_m,
+                 t_phi_lb_scale = t_phi_lb_scale,
                  wT_mean = wT_mean,
                  wT_lb = wT_lb, 
                  w_gl = w_gl, 
                  gl_phi = gl_phi, 
-                 t_phi_lb = t_phi_lb,
                  TF_prior_beta_b = TF_prior_beta_b, 
-                 gl_comp_mean = gl_comp_mean)
+                 gl_comp_mean = gl_comp_mean, 
+                 t_phi_a = 1, 
+                 t_phi_b = 1)
 
-initf1 <- function() {list("TF" = rbeta(1, 1, TF_prior_beta_b),
-                           "t_phi" = rexp(1, 1) + t_phi_lb,
-                           "w_t" = rbeta(1, n_UT*wT_mean, n_UT-(n_UT*wT_mean)))} 
+# set initial values
+initf1 <- function() {list("TF" = 1e-5,
+                           "t_phi" = runif(1, (cfDNA_max_mean_m*1e-5)**2/((cfDNA_max_mean_m*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_m*1e-5)), 100),
+                           "w_t" = runif(1, wT_lb, 1))} 
 
+
+# posterior sampling
 set.seed(1)
 start_time <- Sys.time()
-out <- rstan::stan(file = post_3cat_mod, 
+out <- rstan::stan(file = mod, 
         data = data_list,
         chains = 4,
-        include = TRUE, pars = c("TF", "w_t", "t_phi", "log_lik", "gl_assign", "t_assign", "n_assign"), #
+        include = TRUE, pars = c("TF", "w_t", "t_phi", "gl_assign", "t_assign", "n_assign"), 
         iter = 2500,
-        warmup = 500, 
+        warmup = 500,
         cores = 4, 
         seed = 1, 
         init = initf1)
 
 end_time <- Sys.time()
-print(end_time - start_time)
+print(paste0("Time used for burn in and posterior sampling: ", end_time - start_time))
+
+print("Model summary")
+sum_mod <- summary(out, pars = c("TF", "w_t", "t_phi", "lp__"))
+sum_mod <- sum_mod$summary
+print(sum_mod)
+
+TF_n_eff = sum_mod["TF", "n_eff"]
+tphi_n_eff = sum_mod["t_phi", "n_eff"]
+
+# handle convergence issues by setting an upper bound to t_phi
+if (TF_n_eff < 1000 | tphi_n_eff < 1000){
+    print("Effective sample size of TF and/or tphi too low, rerunning model with more informative t_phi prior to ensure convergence")
+    print(paste0("TF effective sample size: ", TF_n_eff))
+    print(paste0("t_phi effective sample size: ", tphi_n_eff))
+
+    # combine input data and parameters
+    data_list = list(n = n_UT,
+                    n_wt_p = n_wt_p,
+                    noise_mu = noise_mu, 
+                    noise_phi = noise_phi,
+                    cfDNA_mean = data$mean, 
+                    c_cfDNA = data$cfDNA,
+                    max_count_cfDNA_p1 = max(data$cfDNA) + 1,
+                    cfDNA_mean_max = cfDNA_max_mean_m,
+                    t_phi_lb_scale = t_phi_lb_scale, 
+                    wT_mean = wT_mean,
+                    wT_lb = wT_lb, 
+                    w_gl = w_gl, 
+                    gl_phi = gl_phi, 
+                    TF_prior_beta_b = TF_prior_beta_b, 
+                    gl_comp_mean = gl_comp_mean, 
+                    t_phi_a = 1, 
+                    t_phi_b = 100)
+
+    # set initial values
+    initf1 <- function() {list("TF" = 1e-5,
+                            "t_phi" = runif(1, (cfDNA_max_mean_m*1e-5)**2/((cfDNA_max_mean_m*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_m*1e-5)), 100),
+                            "w_t" = runif(1, wT_lb, 1))} 
+
+
+    # posterior sampling
+    set.seed(1)
+    start_time <- Sys.time()
+    out <- rstan::stan(file = mod, 
+            data = data_list,
+            chains = 4,
+            include = TRUE, pars = c("TF", "w_t", "t_phi", "gl_assign", "t_assign", "n_assign"), 
+            iter = 2500,
+            warmup = 500,
+            cores = 4, 
+            seed = 1, 
+            init = initf1)
+
+    end_time <- Sys.time()
+    print(paste0("Time used for burn in and posterior sampling (model with a strict t_phi upper bound): ", end_time - start_time))
+
+    print("Model summary")
+    sum_mod <- summary(out, pars = c("TF", "w_t", "t_phi", "lp__"))
+    sum_mod <- sum_mod$summary
+    print(sum_mod)
+
+}
 
 # post processing
 print("Extracting MCMC samples")
-list_of_draws <- extract(out, pars = c("TF", "w_t", "t_phi", "log_lik", "gl_assign", "t_assign", "n_assign"))
+list_of_draws <- extract(out, pars = c("gl_assign", "t_assign", "n_assign"))
 flush.console()
-
-print("Model summary")
-sum_mod <- summary(out, pars = c("TF", "w_t", "t_phi", "log_lik[1]", "lp__"))
-sum_mod <- sum_mod$summary
-print(sum_mod)
 
 print("Model summary statistics for all parameters")
 mean_estimate_tf <- sum_mod["TF", "mean"][[1]]
@@ -152,88 +244,12 @@ for (i in 1:length(unique_cfDNA_val)){
 print("Mean component assignments, df head")
 print(head(cfDNA_assignments_res))
 
-
-######################### 2 cat model #########################
-
-# modeling
-set.seed(1)
-data_list = list(n = n_UT, 
-                 noise_mu = noise_mu, 
-                 noise_phi = noise_phi,
-                 cfDNA_mean = data$mean, 
-                 c_cfDNA = data$cfDNA,
-                 max_count_cfDNA_p1 = max(data$cfDNA) + 1, 
-                 w_gl = w_gl, 
-                 gl_phi = gl_phi, 
-                 gl_comp_mean = gl_comp_mean)
-
-
-set.seed(1)
-start_time <- Sys.time()
-out2 <- rstan::stan(file = post_2cat_mod, 
-        algorithm="Fixed_param",
-        data = data_list,
-        chains = 4,
-        include = TRUE, pars = c("log_lik", "gl_assign", "n_assign"), #
-        iter = 2500,
-        warmup = 500, 
-        cores = 4, 
-        seed = 1)
-
-end_time <- Sys.time()
-print(end_time - start_time)
-
-# post processing
-print("Extracting MCMC samples")
-list_of_draws2 <- extract(out2, pars = c("log_lik", "gl_assign", "n_assign"))
-flush.console()
-
-print("Model summary")
-sum_mod2 <- summary(out2, pars = c("log_lik[1]", "lp__"))
-sum_mod2 <- sum_mod2$summary
-print(sum_mod2)
-
-# save component assignments
-unique_cfDNA_val = sort(unique(data$cfDNA))
-cfDNA_assignments_res2 <- NULL
-for (i in 1:length(unique_cfDNA_val)){
-    c_cfDNA = unique_cfDNA_val[i]
-    n_cfDNA = sum(data$cfDNA == c_cfDNA)
-    
-    gl_assign = list_of_draws2$gl_assign[ ,c_cfDNA+1]
-    n_assign = list_of_draws2$n_assign[ ,c_cfDNA+1]
-    res_i = tibble(count = c_cfDNA, 
-                   n_kmers = n_cfDNA,
-                   germline = round(mean(gl_assign)), 
-                   noise = round(mean(n_assign)))
-    cfDNA_assignments_res2 <- rbind(cfDNA_assignments_res2, res_i)
-}
-print("Mean component assignments, df head")
-print(head(cfDNA_assignments_res2))
-
-######################### Model comparison #########################
-log_lik1_sum <- sum(list_of_draws$log_lik)
-log_lik2_sum <- sum(list_of_draws2$log_lik)
-ll_diff = log_lik1_sum - log_lik2_sum
-
-print("Log lik 1")
-print(log_lik1_sum)
-print("Log lik 2")
-print(log_lik2_sum)
-print("Log lik diff")
-print(ll_diff)
-
 ######################### Write results #########################
 res_3cat <- tibble(tf_mean = mean_estimate_tf, tf_lower_CI = lower_CI_tf, tf_upper_CI = upper_CI_tf, tf_n_eff = n_eff_tf, tf_r_hat = r_hat_tf,
                    wt_mean = mean_estimate_wt, wt_lower_CI = lower_CI_wt, wt_upper_CI = upper_CI_wt, wt_n_eff = n_eff_wt, wt_r_hat = r_hat_wt,
-                   tphi_mean = mean_estimate_t_phi, tphi_lower_CI = lower_CI_t_phi, tphi_upper_CI = upper_CI_t_phi, tphi_n_eff = n_eff_t_phi, tphi_r_hat = r_hat_t_phi, 
-                   log_lik_sum = log_lik1_sum)
+                   tphi_mean = mean_estimate_t_phi, tphi_lower_CI = lower_CI_t_phi, tphi_upper_CI = upper_CI_t_phi, tphi_n_eff = n_eff_t_phi, tphi_r_hat = r_hat_t_phi)
 write.csv(res_3cat, snakemake@output[["estimates"]], row.names = FALSE)
 write.csv(cfDNA_assignments_res, snakemake@output[["cfDNA_assignments_df"]], row.names = FALSE)
-
-res_2cat <- tibble(log_lik_sum = log_lik2_sum)
-write.csv(res_2cat, snakemake@output[["estimates_2cat"]], row.names = FALSE)
-write.csv(cfDNA_assignments_res2, snakemake@output[["cfDNA_assignments_df_2cat"]], row.names = FALSE)
 sink()
 
 png(filename = snakemake@output[["traceplot"]])
@@ -250,8 +266,4 @@ dev.off()
 
 sink(snakemake@output[["summary_txt"]])
 print(sum_mod)
-sink()
-
-sink(snakemake@output[["summary_txt_2cat"]])
-print(sum_mod2)
 sink()

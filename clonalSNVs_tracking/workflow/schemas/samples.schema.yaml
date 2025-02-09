@@ -1,0 +1,56 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the sample sheet
+properties:
+  sample_ID:
+    type: string
+    description: sample (patient) name/id
+    uniqueItems: true
+  tumor_bam:
+    type: string
+    description: tumor WGS data in BAM format.
+    uniqueItems: true
+  germline_bam:
+    type: string
+    description: matched germline WGS data in BAM format.
+  mutect:
+    type: string
+    description: Mutect2 calls made with tumor-normal mode.
+  female:
+    type: boolean
+    description: patient gender (autosomes + chrX included for females, only autosomes included for males)
+    default: False
+  tp_min:
+    type: number
+    description: minimum tumor purity value considered by sequenza
+    default: 0.1
+  tp_max:
+    type: number
+    description: maximum tumor purity value considered by sequenza
+    default: 0.85
+  pl_min:
+    type: number
+    description: minimum ploidy value considered by sequenza
+    default: 1
+  pl_max:
+    type: number
+    description: maximum ploidy value considered by sequenza
+    default: 2.5
+  VAF_min:
+    type: string
+    description: minimum VAF allowed for clonal SNVs. Either a fraction value (as a string) or "lower_peak" which indicates that the lower VAF peak of the bimodal VAF distribution will be chosen as the cutoff.
+    default: "lower_peak"
+  VAF_max:
+    type: number
+    description: maximum VAF allowed for clonal SNVs
+    default: 0.9
+  mobster_cutoff:
+    type: number
+    description: Mobster cutoff for computing variant clustering assignments
+    default: 0.85
+
+required:
+  - sample_ID
+  - tumor_bam
+  - germline_bam
+  - mutect

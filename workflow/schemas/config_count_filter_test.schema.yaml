@@ -1,0 +1,94 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: snakemake configuration file for count filtering test
+
+type: object
+
+properties:
+  samples:
+    type: string
+    description: path to a TSV file containing patient data that the count filtering test will be done on. File defines patient ID's and their corresponding tumor and matched germline file paths
+    default: config/samples.tsv
+
+  samples_glu:
+    type: string
+    description: path to a TSV file containing sample data for the germline union k-mer set. File definines sample ID's and their corresponding germline file paths
+    default: config/samples_glu.tsv
+
+  samples_cfDNA:
+    type: string
+    description: path to a TSV file containing patients' cfDNA data that the count filtering test will be done on. File defines patient ID's (matching with ID's in samples.tsv), cfDNA sample ID's, cfDNA file paths and the timepoint of the cfDNA samples (relative to the baseline treatment). Two cfDNA samples needed from each patient. One ctDNA positive and one ctDNA negative. Samples ctDNA status should be known and samples with a larger TF difference should be preferred. 
+    default: config/units.tsv
+
+  donors:
+    type: string
+    description: path to a TSV file containing unmatched cfDNA data for empirical noise distribution estimation. File defines individual ID's and cfDNA file paths
+    default: config/donors.tsv
+
+  k: 
+    type: integer
+    description: k-mer length
+    default: 51
+
+  gc_lower:
+    type: integer
+    description: lower GC content cutoff
+    default: 20
+      
+  gc_upper:
+    type: integer
+    description: upper GC content cutoff
+    default: 80
+
+  tumor_fileformat:
+    type: string
+    description: primary tumor data input format. Either FASTQ or BAM.
+    enum: ["FASTQ", "BAM"]
+    default: "FASTQ"
+
+  count_LB:
+    type: integer
+    description: global tumor count lower cutoff
+    default: 3
+  
+  count_UB:
+    type: integer
+    description: global tumor count upper cutoff
+    default: 100
+  
+  TF_prior_n:
+    type: integer
+    description: tumor fraction prior Beta distribution sample size 
+    default: 1000
+  
+  t_phi_lb_scale:
+    type: integer
+    description: scaling factor of the tumor component variance scaling parameter lower bound (controls variance upper bound; maximum var = tumor component mean * scaling value) 
+    default: 5
+
+  baseline_model:
+    type: object
+    description: Input parameters to the tumor fraction estimation model for baseline/pre-treatment cfDNA samples
+    properties:
+      t_w_mean:
+        type: number
+        description: tumor component weight prior distribution mean
+        default: 0.5
+      t_w_lb:
+        type: number
+        description: tumor component weight lower bound
+        default: 0.01
+      gl_w_beta_b:
+        type: integer
+        description: germline component weight prior Beta distribution b parameter (also controls the sample size of the prior)
+        default: 100
+      t_w_prior_n_scale:
+        type: number
+        description: tumor component weight prior distribution sample size scaling value. The sample size of the prior will be the total_input_size (number of UT k-mers) * scaling value
+        default: 0.5
+
+required:
+  - samples
+  - samples_glu
+  - samples_cfDNA
+  - donors

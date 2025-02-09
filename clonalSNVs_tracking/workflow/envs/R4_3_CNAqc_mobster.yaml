@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.3.3
+  - r-tidyverse=2.0.0
+  - r-coda=0.19_4.1
+  - r-rstan=2.32.6
+  - r-devtools=2.4.5
+  - bioconductor-variantannotation=1.48.1

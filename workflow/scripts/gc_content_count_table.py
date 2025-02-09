@@ -2,30 +2,31 @@ import sys
 import os
 from collections import Counter
 
-# logging
+# logging,  printing and output directory
 os.makedirs(os.path.dirname(snakemake.log[0]), exist_ok=True)
 os.makedirs(os.path.dirname(snakemake.output.count_table), exist_ok=True)
 sys.stderr = open(snakemake.log[0], "a+")
 sys.stdout = sys.stderr
 
 
-# input
+# input parameters
 max_count = int(snakemake.params.max_count)
 kmer_len = int(snakemake.params.k)
 print(f"Maximum count: {max_count}")
 print(f"K-mer length: {kmer_len}")
 
+# input data
+file = open(snakemake.input.kmers, 'r') 
+
 counter = Counter()
 index_c = 0
-file = open(snakemake.input.kmers, 'r')
-
 while True:
     line = file.readline()
     if not line:
         break
     
     index_c += 1
-    if index_c % 100000 == 0:
+    if index_c % 100000 == 0: # track progress
         print(index_c)
         sys.stdout.flush()
 
@@ -35,17 +36,19 @@ while True:
     if count <= int(max_count):
         GC = 0
         for i in kmer:
-            if i in ["G", "C"]:
+            if i in ["G", "C"]: # count GC bases
                 GC += 1
 
-        GC_perc = round(GC*100/kmer_len)
+        GC_perc = round(GC*100/kmer_len) # calculate GC content
         counter[(GC_perc, count)] += 1
 
 file.close()
 
 columns = ['GC','count', 'n_kmers']
 outfile = open(snakemake.output.count_table, 'w')
-sys.stdout = outfile
+sys.stdout = outfile # direct output to the correct file
+
+# print output
 print('\t'.join(columns))
 for tup, count in counter.items():
     print('\t'.join(str(x) for x in tup) + '\t' + str(count))

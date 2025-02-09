@@ -1,0 +1,2 @@
+sample_ID	tumor_bam	germline_bam	mutect	female	tp_min	tp_max	pl_min	pl_max	VAF_min	VAF_max	mobster_cutoff
+pt1	/home/user/patients/pt1/tumor/pt1.bam	/home/user/patients/pt1/buffycoat/pt1.bam	/home/user/patients/pt1/var_calls/mutect2.vcf	False	0.1	0.85	1	2.5	lower_peak	0.9	0.85

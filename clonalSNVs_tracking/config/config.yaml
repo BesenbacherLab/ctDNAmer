@@ -1,0 +1,7 @@
+samples: config/samples.tsv
+samples_cfDNA: config/units.tsv
+reference: 
+  name: "hg38"
+  fasta: "/home/user/reference/hg38.fasta"
+
+vep_cache_path: "results/vep/cache/GRCh38"

@@ -1,5 +1,6 @@
 data{
     int n; // number of UT k-mers
+    int n_wt_p; //sample size w_t prior
     real cfDNA_mean[n]; // mean k-mer count in cfDNA sample
     real noise_mu; // noise negbin mu parameter
     real noise_phi; // noise negbin phi parameter
@@ -9,22 +10,25 @@ data{
     real wT_lb; // tumor component weight lower bound
     real w_gl; // germline component weight from 3cat preop model
     real gl_phi; // germline negbin phi parameter from 3cat preop model
-    real t_phi_lb; // tumor component phi lower bound
+    real t_phi_lb_scale; //tumor component phi lower bound scaling factor
+    real cfDNA_mean_max; // min cfDNA mean
     int TF_prior_beta_b; //TF beta prior b parameter
     real gl_comp_mean; //germline component mean 
+    real t_phi_a; // t_phi gamma prior a parameter
+    real t_phi_b; // t_phi gamma prior b parameter
 }
 
 parameters{
     real<lower=0, upper=1> TF; // tumor fraction
     real<lower=wT_lb, upper=1> w_t; // tumor component weight
-    real<lower=t_phi_lb> t_phi; // tumor distribution phi
+    real<lower=pow((cfDNA_mean_max*TF), 2)/((cfDNA_mean_max*TF*t_phi_lb_scale) - (cfDNA_mean_max*TF))> t_phi;
 }
 
 model{
     TF ~ beta(1, TF_prior_beta_b);
-    w_t ~ beta(n*wT_mean, (n - (wT_mean*n))) T[wT_lb, ];
+    w_t ~ beta(n_wt_p*wT_mean, (n_wt_p - (wT_mean*n_wt_p))) T[wT_lb, ];
 
-    t_phi ~ exponential(1);
+    t_phi ~ gamma(t_phi_a, t_phi_b) T[pow((cfDNA_mean_max*TF), 2)/((cfDNA_mean_max*TF*t_phi_lb_scale) - (cfDNA_mean_max*TF)), ];
     
     for (i in 1:n){
         vector[3] contributions;

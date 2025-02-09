@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import os
     
-    
+
 def FilterReadsBam(in_file, out_file):
     print("Starting to filter")
     sys.stdout.flush()
@@ -18,20 +18,21 @@ def FilterReadsBam(in_file, out_file):
     filtered_out = 0
     for read in bam_in.fetch():
         reads += 1
-        if reads % 10000000 == 0:
+        if reads % 10000000 == 0: # track progress
             print(reads)
             sys.stdout.flush()
 
         passing_read = True
-        if len(read.seq) == len(read.qual):
+        if len(read.seq) == len(read.qual): # check that sequence and BQ list have the same length
             len_read = len(read.seq)
-            low_qual_list = [i for i,x in enumerate(read.qual) if ord(x)-33 < max_quality]
+            low_qual_list = [i for i,x in enumerate(read.qual) if ord(x)-33 < max_quality] # find indices of low BQ positions
             if len(low_qual_list) > 0:
                 passing_read = False
             
+            # set first and last five bases, and all bases with BQ < 37 to N
             new_read = "".join(["N" if i in low_qual_list or i < 5 or i > (len_read - 6) else x for i, x in enumerate(read.seq)])
     
-            read.seq = new_read
+            read.seq = new_read # save new read
             if passing_read: 
                 passing_reads += 1
             else:
@@ -62,7 +63,7 @@ os.makedirs(os.path.dirname(snakemake.output.filtered_files), exist_ok=True)
 with open(snakemake.output.filtered_files, 'w') as fp:
     pass
 
-# input
+# input data
 in_files = snakemake.input.input_files
 out_files = snakemake.output.filtered_files
 output_path_prefix = os.path.dirname(out_files) + "/"
@@ -70,7 +71,7 @@ output_path_prefix = os.path.dirname(out_files) + "/"
 
 input_files = open(in_files, 'r')
 count = 0
-for line in input_files:
+for line in input_files: # loop over input files
     count += 1
     input_filepath_i = line.strip()
     input_filename = os.path.basename(input_filepath_i)

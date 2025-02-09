@@ -1,0 +1,37 @@
+
+include: "rules/count_filter_test/common.smk"
+OUTPUT_C = []
+
+
+# cfDNA output
+CFDNA_MEAN_GC = expand(
+    "results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv", zip, 
+    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
+    )
+OUTPUT_C.extend(CFDNA_MEAN_GC)
+
+
+# modeling output
+PREOP_TF = expand( 
+    "results/patients/{pt}/{preop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/preop_combined_tf_estimates.csv", zip, 
+    pt=preop_units.sample_ID.tolist(), preop_cfDNA_ID=preop_units.index.tolist()
+    )
+POSTOP_TF = expand(
+    "results/patients/{pt}/{postop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/postop_combined_tf_estimates.csv", zip,
+    pt=postop_units.sample_ID.tolist(), postop_cfDNA_ID=postop_units.index.tolist()
+    )
+OUTPUT_C.extend(PREOP_TF+POSTOP_TF)
+
+##### Target rules #####
+rule all:
+    input:
+        OUTPUT_C
+
+
+##### Modules #####
+include: "rules/germline_union.smk"
+include: "rules/count_filter_test/unique_tumor.smk"
+include: "rules/count_filter_test/empirical_noise.smk"
+include: "rules/count_filter_test/cfDNA.smk"
+include: "rules/count_filter_test/ut_annotation.smk"
+include: "rules/count_filter_test/TF_modeling.smk"

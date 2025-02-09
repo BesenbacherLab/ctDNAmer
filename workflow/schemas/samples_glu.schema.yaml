@@ -1,0 +1,20 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the germline union sample sheet
+properties:
+  sample_ID:
+    type: string
+    description: sample name/id
+    uniqueItems: true
+  data_type:
+    type: string
+    description: type of the germline sample (e.g. cfDNA or buffycoat)
+  data_files:
+    type: string
+    description: germline WGS data either in FASTQ or BAM format. Multiple files can be listed with commas inbetween file paths
+    uniqueItems: true
+
+required:
+  - sample_ID
+  - data_type
+  - data_files

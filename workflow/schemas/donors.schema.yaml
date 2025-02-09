@@ -1,0 +1,16 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the sample sheet
+properties:
+  donor_ID:
+    type: string
+    description: donor name/id (either cancer patient or healthy individual) 
+    uniqueItems: true
+  cfDNA:
+    type: string
+    description: cfDNA WGS data either in FASTQ or BAM format. Multiple files can be listed with commas inbetween file paths
+    uniqueItems: true
+
+required:
+  - donor_ID
+  - cfDNA

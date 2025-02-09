@@ -1,5 +1,6 @@
 data{
     int n; // number of UT k-mers
+    int n_wt_p; //sample size w_t prior
     real cfDNA_mean[n]; // mean k-mer count in cfDNA sample, gc-content stratified
     real noise_mu; // noise negbin mu parameter
     real noise_phi; // noise negbin phi parameter
@@ -7,29 +8,33 @@ data{
     int max_count_cfDNA_p1; // max cfDNA count + 1, for component assignment saving
     real wT_mean; // tumor component weight prior mean
     real wT_lb; // tumor component weight lower bound
-    real t_phi_lb; //tumor component phi lower bound
+    real t_phi_lb_scale; //tumor component phi lower bound scaling factor
+    //real t_phi_lb_c_scale;
+    real cfDNA_mean_max; // min cfDNA mean
     int TF_prior_beta_b; //TF beta prior b parameter
     real gl_phi_lb; //germline component phi lower bound
     int w_gl_prior_beta_b; //wgl beta prior b parameter
-    real gl_comp_mean; //germline component mean 
+    real gl_comp_mean; //germline component mean
+    real t_phi_a; // t_phi gamma prior a parameter
+    real t_phi_b; // t_phi gamma prior b parameter
 }
 
 parameters{
     real<lower=0, upper=1> TF; // tumor fraction
     real<lower=wT_lb, upper=1> w_t; // tumor component weight
-    real<lower=0, upper=1> w_gl; // germline component weight
-    real<lower=gl_phi_lb> gl_phi; // germline distribution phi
-    real<lower=t_phi_lb> t_phi; // tumor distribution phi
-}
+    real<lower=0, upper=1> w_gl; // germline component weight wgl_lb
+    real<lower=gl_phi_lb> gl_phi; // germline distribution phi  
+    real<lower=pow((cfDNA_mean_max*TF), 2)/((cfDNA_mean_max*TF*t_phi_lb_scale) - (cfDNA_mean_max*TF))> t_phi; //, upper=1000 ; 
+}     
 
 model{
     TF ~ beta(1, TF_prior_beta_b);
-    w_gl ~ beta(1, w_gl_prior_beta_b);
-    w_t ~ beta(n*wT_mean, (n - (wT_mean*n))) T[wT_lb, ];
+    w_gl ~ beta(1, w_gl_prior_beta_b); 
+    w_t ~ beta(n_wt_p*wT_mean, (n_wt_p - (wT_mean*n_wt_p))) T[wT_lb, ]; 
 
-    gl_phi ~ exponential(1);
-    t_phi ~ exponential(1);
-
+    gl_phi ~ exponential(1);  
+    t_phi ~ gamma(t_phi_a, t_phi_b) T[pow((cfDNA_mean_max*TF), 2)/((cfDNA_mean_max*TF*t_phi_lb_scale) - (cfDNA_mean_max*TF)), ]; 
+    
     for (i in 1:n){
         vector[3] contributions;
         contributions[1] = log(w_t) + neg_binomial_2_lpmf(c_cfDNA[i] | TF*cfDNA_mean[i], t_phi);

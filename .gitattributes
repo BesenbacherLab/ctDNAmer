@@ -1,2 +1,3 @@
 *.smk linguist-language=Python
 Snakefile linguist-language=Python
+Snakefile_count_filter_test linguist-language=Python

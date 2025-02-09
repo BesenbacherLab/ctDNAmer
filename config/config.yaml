@@ -6,4 +6,16 @@ donors: config/donors.tsv
 k: 51
 gc_lower: 20
 gc_upper: 80
-tumor_fileformat: "fastq"
+tumor_fileformat: "FASTQ"
+min_UT_set_size: 20000
+count_LB: 3
+count_UB: 100
+TF_prior_n: 1000
+t_phi_lb_scale: 5
+
+baseline_model: 
+  t_w_mean: 0.5
+  t_w_lb: 0.01
+  gl_w_beta_b: 100
+  t_w_prior_n_scale: 0.5
+  

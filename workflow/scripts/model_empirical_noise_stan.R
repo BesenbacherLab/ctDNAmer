@@ -1,15 +1,16 @@
-sink(snakemake@log[[1]], append=TRUE)
+sink(snakemake@log[[1]], append=TRUE) # logging
 
+# packages
 library(tidyverse)
 library(coda)
 library(rstan)
 rstan_options(auto_write = TRUE)
 
-# input params
+# input parameters
 donor_list <- snakemake@params[["donor_list"]]
 gc_lower <- as.integer(snakemake@params[["gc_lower"]])
 gc_upper <- as.integer(snakemake@params[["gc_upper"]])
-
+print(paste0("GC content cutoffs: ", gc_lower, ", ", gc_upper))
 
 # input data
 UT_mdata = read.table(snakemake@input[["UT_mdata"]], header = TRUE)
@@ -17,10 +18,8 @@ n_UT <- UT_mdata$nUT_final[1]
 print(paste0("Total number of UT k-mers: ", n_UT))
 
 min_Tcount <- UT_mdata$final_lower_cutoff[1]
-print(paste0("Minimum tumor count: ", min_Tcount))
-
 max_Tcount <- UT_mdata$final_upper_cutoff[1]
-print(paste0("Maximum tumor count: ", max_Tcount))
+print(paste0("Minimum and maximum tumor count: ", min_Tcount, ", ", max_Tcount))
 
 noise_count_tables_file_list <- snakemake@input[["noise_count_tables"]]
 print("List of noise count tables")
@@ -30,14 +29,13 @@ donor_means_file_list <- snakemake@input[["donor_means"]]
 ########## 1. Prepare data for modeling ##########
 comb_donor_data <- NULL
 for (donor in donor_list){
-    print(donor)
     data_i = read.table(noise_count_tables_file_list[grepl(donor, noise_count_tables_file_list, fixed = TRUE)], header = TRUE, sep = "\t")
     mean_i = read.csv(donor_means_file_list[grepl(donor, donor_means_file_list, fixed = TRUE)], header = TRUE, sep = ",")
 
     data_i <- data_i |> 
-        filter(between(GC, gc_lower, gc_upper)) |> 
-        filter(between(UT_count, min_Tcount, max_Tcount))
-    if (nrow(data_i) == 0){
+        filter(between(GC, gc_lower, gc_upper)) |> # GC content filtering
+        filter(between(UT_count, min_Tcount, max_Tcount)) # count filtering
+    if (nrow(data_i) == 0){ # in case of no noise k-mers, create a pseudo set with one noise k-mer
         print("No noise k-mers observed in this donor, adding a pseudocount")
         data_i <- tibble(GC = 50, 
                          UT_count = min_Tcount, 
@@ -53,11 +51,12 @@ for (donor in donor_list){
 }
 
 ########## 2. Set up and specify the model ##########
-set.seed(1)
+# combine input data
 data_list = list(n = nrow(comb_donor_data),
                  mean_count = comb_donor_data$donor_mean, 
                  donor_count = comb_donor_data$count)
 
+# set initial values
 initf1 <- function() {
       list("mean_noise" = 0.01, "phi_noise" = 0.1)
     }
@@ -76,27 +75,19 @@ out <- rstan::stan(file = snakemake@input[["model"]],
         seed = 1 , 
         init = initf1)
 end_time <- Sys.time()
-print("MCMC sampling done")
-print(end_time - start_time)
+print(paste0("Time used for burn in and posterior sampling: ", end_time - start_time))
 flush.console()
 
 ########## 4. Post processing ##########
 print(out, pars=c("mean_noise", "phi_noise", "lp__"), probs=c(.1,.5,.9))
 
-list_of_draws <- extract(out)
-print(names(list_of_draws))
-print(head(list_of_draws$mean_noise))
-print(head(list_of_draws$phi_noise))
-print(length(list_of_draws$phi_noise))
-
-df_of_draws <- as.data.frame(out)
-print(colnames(df_of_draws))
-
+# model summary
 print("Model summary")
 fit_summary <- summary(out, probs = c(0.025, 0.5, 0.975))
 sum_mod <- fit_summary$summary
 print(sum_mod)
 
+# parameter estiamtes with 95% CI's
 print("Model summary statistics for the mean and phi parameters")
 mean_estimate_mu <- sum_mod["mean_noise", "mean"][[1]]
 lower_CI_mu <- sum_mod["mean_noise", "2.5%"][[1]]
@@ -110,26 +101,17 @@ upper_CI_phi <- sum_mod["phi_noise", "97.5%"][[1]]
 print("phi_noise: Mean, 2.5% and 97.5% quantiles")
 print(c(mean_estimate_phi, lower_CI_phi, upper_CI_phi))
 
+# effective sample size
 n_eff_mu <- sum_mod["mean_noise", "n_eff"][[1]]
 n_eff_phi <- sum_mod["phi_noise", "n_eff"][[1]]
 print("Effective sample Size: mean_noise, phi_noise")
 print(c(n_eff_mu, n_eff_phi))
 
+# Rhat values
 r_hat_mu <- sum_mod["mean_noise", "Rhat"][[1]]
 r_hat_phi <- sum_mod["phi_noise", "Rhat"][[1]]
 print("Rhat: mean_noise, phi_noise")
 print(c(r_hat_mu, r_hat_phi))
-
-# Diagnostics
-sampler_params <- get_sampler_params(out, inc_warmup = FALSE)
-sampler_params_chain1 <- sampler_params[[1]]
-print(colnames(sampler_params_chain1))
-
-mean_accept_stat_by_chain <- sapply(sampler_params, function(x) mean(x[, "accept_stat__"]))
-print(mean_accept_stat_by_chain)
-
-max_treedepth_by_chain <- sapply(sampler_params, function(x) max(x[, "treedepth__"]))
-print(max_treedepth_by_chain)
 
 ########## 5. write results and convergence diagnostics ##########
 res <- tibble(mean_mu = mean_estimate_mu, 

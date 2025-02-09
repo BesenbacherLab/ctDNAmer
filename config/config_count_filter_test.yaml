@@ -1,0 +1,20 @@
+samples: config/samples_count_filter_test.tsv
+samples_glu: config/samples_glu.tsv
+samples_cfDNA: config/units_count_filter_test.tsv
+donors: config/donors.tsv
+
+k: 51
+gc_lower: 20
+gc_upper: 80
+tumor_fileformat: "FASTQ"
+count_LB: 3
+count_UB: 100
+TF_prior_n: 1000
+t_phi_lb_scale: 5
+
+baseline_model: 
+  t_w_mean: 0.5
+  t_w_lb: 0.01
+  gl_w_beta_b: 100
+  t_w_prior_n_scale: 0.5
+  

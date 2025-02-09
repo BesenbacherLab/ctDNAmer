@@ -1,0 +1,20 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the sample sheet
+properties:
+  sample_ID:
+    type: string
+    description: sample (patient) name/id
+    uniqueItems: true
+  tumor:
+    type: string
+    description: tumor WGS data either in FASTQ or BAM format. Multiple files can be listed with commas inbetween file paths
+    uniqueItems: true
+  germline:
+    type: string
+    description: matched germline WGS data either in FASTQ or BAM format. Multiple files can be listed with commas inbetween file paths
+
+required:
+  - sample_ID
+  - tumor
+  - germline

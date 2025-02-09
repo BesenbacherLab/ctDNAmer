@@ -1,0 +1,24 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the count filtering test units sheet
+properties:
+  sample_ID:
+    type: string
+    description: patient name/id to be included in the count filtering test
+  cfDNA_ID:
+    type: string
+    description: cfDNA sample name/id. Two cfDNA samples needed from each patient. One ctDNA positive and one ctDNA negative. Samples ctDNA status should be known and samples with a larger TF difference should be preferred. 
+    uniqueItems: true
+  cfDNA:
+    type: string
+    description: cfDNA WGS data either in FASTQ or BAM format. Multiple files can be listed with commas inbetween file paths
+  timepoint:
+    type: integer
+    description: cfDNA sample timepoint relative to the (start of) the baseline treatment.
+
+
+required:
+  - sample_ID
+  - cfDNA_ID
+  - cfDNA
+  - timepoint

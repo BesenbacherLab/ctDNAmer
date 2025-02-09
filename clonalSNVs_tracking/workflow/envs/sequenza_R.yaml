@@ -1,0 +1,17 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=3.5.1
+  - r-remotes=2.1.1
+  - r-seqminer=7.1
+  - r-readr=1.1.1
+  - r-testthat=2.0.0
+  - r-knitr=1.28
+  - r-lifecycle=0.1.0
+  - r-fs=1.4.1
+  - r-evaluate=0.13
+  - r-pbapply=1.4
+  - r-squash=1.0.8
+  - r-iotools=0.2

@@ -1,0 +1,23 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the units sheet
+properties:
+  sample_ID:
+    type: string
+    description: patient name/id
+  cfDNA_ID:
+    type: string
+    description: cfDNA sample name/id
+    uniqueItems: true
+  cfDNA:
+    type: string
+    description: cfDNA WGS data either in BAM format.
+  timepoint:
+    type: integer
+    description: cfDNA sample timepoint relative to the (start of) the baseline treatment.
+
+required:
+  - sample_ID
+  - cfDNA_ID
+  - cfDNA
+  - timepoint

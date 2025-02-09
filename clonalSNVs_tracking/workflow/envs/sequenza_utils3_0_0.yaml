@@ -1,0 +1,10 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - pip=24.0
+  - python=3.10
+  - samtools=1.6
+  - pip:
+      - sequenza-utils==3.0.0

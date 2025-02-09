@@ -1,0 +1,55 @@
+
+include: "rules/common.smk"
+OUTPUT = []
+
+
+# prepared SNV calls
+PREPARED_SNVS = expand(
+    "results/{pt}/SNVs_prep/mutect_calls_filtered.annotated.cnaqc_format.vcf",
+    pt=samples.index.tolist()
+    )
+
+# sequenza output
+SEQUENZA_BINS = expand(
+    "results/{pt}/sequenza/small_w50.seqz.qz",
+    pt=samples.index.tolist()
+    )
+SEQUENZA_FIT = expand(
+    "results/{pt}/sequenza/{pt}_segments.txt",
+    pt=samples.index.tolist()
+    )
+
+# clonal SNVs for tracking filtered based on tumor quality
+CLONAL_QFILTERED_SNVS = expand(
+    "results/{pt}/SNVs_QC/QC_passed_low_VAF_rm_SNVs.txt",
+    pt=samples.index.tolist()
+    )
+CLONAL_TFILTERED_SNVS = expand(
+    "results/{pt}/SNVs_QC/QC_passed_low_VAF_rm_SNVs_Tfiltered.txt",
+    pt=samples.index.tolist()
+    )
+
+# clonal SNVs in cfDNA
+SNVS_IN_CFDNA = expand(
+    "results/{pt}/{cfDNA_ID}/SNVs_in_cfDNA.txt", zip,
+    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
+    )
+OUTPUT.append(SNVS_IN_CFDNA)
+
+
+# clonal SNVs mean AF in cfDNA
+SNVS_MEAN_AF_IN_CFDNA = expand(
+    "results/{pt}/clonal_SNVs_in_cfDNA/mean_AF.tsv", zip,
+    pt=units.sample_ID.tolist(),
+    )
+OUTPUT.append(SNVS_MEAN_AF_IN_CFDNA)
+
+rule all:
+    input: 
+        OUTPUT
+
+##### Modules #####
+include: "rules/mutect_calls_preparation.smk"
+include: "rules/sequenza.smk"
+include: "rules/CNAqc.smk"
+include: "rules/SNV_tracking_in_cfDNA.smk"

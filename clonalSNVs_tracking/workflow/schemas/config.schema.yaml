@@ -1,0 +1,42 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: snakemake configuration file for calculating clonal SNVs mean allele frequency in cfDNA samples
+
+type: object
+
+properties:
+  samples:
+    type: string
+    description: path to a TSV file containing patient data. File defines patient ID's and corresponding data file paths
+    default: config/samples.tsv
+  
+  samples_cfDNA:
+    type: string
+    description: path to a TSV file containing patients' cfDNA data. File defines patient ID's (matching with ID's in samples.tsv), cfDNA sample ID's, cfDNA file paths and the timepoint of the cfDNA samples (relative to the baseline treatment)
+    default: config/units.tsv
+  
+  reference:
+    type: object
+    description: Details about the reference genome where reads have been aligned to
+    properties:
+      name:
+        type: string
+        description: name of the reference that the reads have been aligned to 
+        default: "hg38"
+      
+      fasta:
+        type: string
+        description: path to reference genome FASTA file
+    required:
+      - name
+      - fasta
+  
+  vep_cache_path:
+    type: string
+    description: path to the VEP cache (file with transcript models; see more at VEP documentation)
+
+required:
+  - samples
+  - samples_cfDNA
+  - reference
+  - vep_cache_path
