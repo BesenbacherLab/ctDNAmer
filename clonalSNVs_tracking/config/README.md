@@ -9,7 +9,7 @@ A name of the reference genome the data is aligned to and a path to the referenc
 ### Ensembl Variant Effect Predictor cache
 For variant annotation, the workflow uses Ensembl Variant Effect Predictor (VEP)[1]. The transcript models file (cache) needs to be downloaded before using the workflow and the path to the cache needs to be specified in config.
 
-See more how to download the cache from (VEP documentation)[https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html].
+See more how to download the cache from [VEP documentation](https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html).
 
 
 # Input data

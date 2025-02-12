@@ -12,7 +12,7 @@ rule model_tf_preop_cfDNA:
         density="results/patients/{pt}/{preop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/minct{ct_cutoff}/preop_param_density.png",
         summary_txt="results/patients/{pt}/{preop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/minct{ct_cutoff}/preop_modeling_summary.txt",
     resources:
-        mem_mb=20000,
+        mem_mb=100000,
         runtime=lambda wildcards, attempt: attempt * 360,
     threads: 4
     log:
@@ -47,7 +47,7 @@ rule model_tf_postop_cfDNA:
         density="results/patients/{pt}/{postop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/minct{ct_cutoff}/postop_param_density.png",
         summary_txt ="results/patients/{pt}/{postop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/minct{ct_cutoff}/postop_modeling_summary.txt",
     resources:
-        mem_mb=50000,
+        mem_mb=100000,
         runtime=lambda wildcards, attempt: attempt * 360,
     threads: 4
     log:
