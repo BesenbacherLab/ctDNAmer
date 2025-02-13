@@ -13,11 +13,6 @@ mod = snakemake@input[["mod"]]
 
 #### input parameters
 
-## general
-gc_lower <- as.integer(snakemake@params[["gc_lower"]])
-gc_upper <- as.integer(snakemake@params[["gc_upper"]])
-print(paste0("GC content cutoffs: ", gc_lower, ", ", gc_upper))
-
 ## tumor component
 TF_prior_beta_b <- as.integer(snakemake@params[["TF_prior_beta_b"]])
 print(paste0("Tumor fraction prior Beta distribution b parameter (sets the prior sample size): ", TF_prior_beta_b))
@@ -76,19 +71,11 @@ n_wt_p = wt_prior_n
 
 ## cfDNA mean count
 f <- snakemake@input[["cfDNA_mean"]]
-cfDNA_mean_count <- read.table(f, header = T, sep = ",") 
-cfDNA_mean_count <- cfDNA_mean_count |> 
-    filter(between(as.numeric(gc_content), gc_lower, gc_upper)) |> 
-    select(gc_content, mean, var) 
-data <- left_join(data, cfDNA_mean_count, by = c("gc_content"))
+cfDNA_mean_df <- read.table(f, header = T, sep = ",") 
+cfDNA_mean  <- cfDNA_mean_df$mean[1]
+cfDNA_var <- cfDNA_mean_df$var[1]
 
-# cfDNA maximum mean value across included GC contents
-cfDNA_max_mean <- cfDNA_mean_count %>% filter(mean == max(mean))
-cfDNA_max_mean_m  <- cfDNA_max_mean$mean[1]
-cfDNA_max_mean_v <- cfDNA_max_mean$var[1]
-
-
-gl_phi_lb = (cfDNA_max_mean_m**2)/((gl_phi_lb_scale*cfDNA_max_mean_v)-cfDNA_max_mean_m)
+gl_phi_lb = (cfDNA_mean**2)/((gl_phi_lb_scale*cfDNA_var)-cfDNA_mean)
 print(paste0("gl phi lower bound, estimated based on cfDNA variance (+ scaling): ", gl_phi_lb))
 
 ######################### 3-component mixture model #########################
@@ -96,12 +83,11 @@ print(paste0("gl phi lower bound, estimated based on cfDNA variance (+ scaling):
 # combine input data and parameters
 data_list = list(n = n_UT, 
                 n_wt_p = n_wt_p, 
-                cfDNA_mean = data$mean, 
+                cfDNA_mean = cfDNA_mean, 
                 noise_mu = noise_mu, 
                 noise_phi = noise_phi, 
                 c_cfDNA = data$cfDNA,
                 max_count_cfDNA_p1 = max(data$cfDNA) + 1, 
-                cfDNA_mean_max = cfDNA_max_mean_m,
                 t_phi_lb_scale = t_phi_lb_scale, 
                 wT_mean = wT_mean,
                 wT_lb = wT_lb, 
@@ -116,10 +102,8 @@ data_list = list(n = n_UT,
 initf1 <- function() {list("TF" = 1e-5, 
                            "w_gl" = rbeta(1, 1, w_gl_prior_beta_b), 
                            "w_t" = runif(1, 0.51, 0.99), 
-                           "t_phi" = runif(1, (cfDNA_max_mean_m*1e-5)**2/((cfDNA_max_mean_m*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_m*1e-5)), 100),
+                           "t_phi" = runif(1, (cfDNA_mean*1e-5)**2/((cfDNA_mean*1e-5*t_phi_lb_scale) - (cfDNA_mean*1e-5)), 100),
                            "gl_phi" = rexp(1, 1) + gl_phi_lb)}
-
-#  "t_phi" = runif(1, max(t_phi_lb_c_scale, (cfDNA_max_mean_m*1e-5)**2/((cfDNA_max_mean_m*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_m*1e-5))),
 
 # posterior sampling
 set.seed(1)
@@ -154,12 +138,11 @@ if (TF_n_eff < 1000 | tphi_n_eff < 1000){
     # combine input data and parameters
     data_list = list(n = n_UT, 
                     n_wt_p = n_wt_p, 
-                    cfDNA_mean = data$mean, 
+                    cfDNA_mean = cfDNA_mean, 
                     noise_mu = noise_mu, 
                     noise_phi = noise_phi, 
                     c_cfDNA = data$cfDNA,
                     max_count_cfDNA_p1 = max(data$cfDNA) + 1, 
-                    cfDNA_mean_max = cfDNA_max_mean_m,
                     t_phi_lb_scale = t_phi_lb_scale, 
                     wT_mean = wT_mean,
                     wT_lb = wT_lb, 
@@ -174,7 +157,7 @@ if (TF_n_eff < 1000 | tphi_n_eff < 1000){
     initf1 <- function() {list("TF" = 1e-5, 
                                 "w_gl" = rbeta(1, 1, w_gl_prior_beta_b), 
                                 "w_t" = runif(1, 0.51, 0.99), 
-                                "t_phi" = runif(1, (cfDNA_max_mean_m*1e-5)**2/((cfDNA_max_mean_m*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_m*1e-5)), 100),
+                                "t_phi" = runif(1, (cfDNA_mean*1e-5)**2/((cfDNA_mean*1e-5*t_phi_lb_scale) - (cfDNA_mean*1e-5)), 100),
                                 "gl_phi" = rexp(1, 1) + gl_phi_lb)}
 
     # posterior sampling

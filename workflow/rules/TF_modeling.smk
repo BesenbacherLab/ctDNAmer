@@ -1,7 +1,7 @@
 rule model_tf_preop_cfDNA:
     input:
         kmer_data="results/patients/{pt}/{preop_cfDNA_ID}/UT_cfDNA_annotation.txt",
-        cfDNA_mean="results/patients/{pt}/{preop_cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv",
+        cfDNA_mean="results/patients/{pt}/{preop_cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean.csv",
         noise_rate=lambda wildcards: str("results/patients/" + str(wildcards.pt) + "/empirical_noise/estimates.csv"),
         mod=os.path.join(workflow.basedir, "scripts/models/tf_preop.stan"),
     output:
@@ -18,8 +18,6 @@ rule model_tf_preop_cfDNA:
     log:
         "logs/patients/{pt}/{preop_cfDNA_ID}/model_tf_preop_cfDNA.out"
     params:
-        gc_lower=config["gc_lower"],
-        gc_upper=config["gc_upper"],
         wT_mean=config["baseline_model"]["t_w_mean"],
         wT_lb=config["baseline_model"]["t_w_lb"],
         TF_prior_beta_b=config["TF_prior_n"],
@@ -35,7 +33,7 @@ rule model_tf_preop_cfDNA:
 rule model_tf_postop_cfDNA:
     input:
         kmer_data="results/patients/{pt}/{postop_cfDNA_ID}/UT_cfDNA_annotation.txt",
-        cfDNA_mean="results/patients/{pt}/{postop_cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv",
+        cfDNA_mean="results/patients/{pt}/{postop_cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean.csv",
         noise_rate=lambda wildcards: str("results/patients/" + str(wildcards.pt) + "/empirical_noise/estimates.csv"),
         preop_est= aggregate_preop_estimates,
         mod=os.path.join(workflow.basedir, "scripts/models/tf_postop.stan"),
@@ -53,8 +51,6 @@ rule model_tf_postop_cfDNA:
     log:
         "logs/patients/{pt}/{postop_cfDNA_ID}/model_tf_postop_.out"
     params:
-        gc_lower=config["gc_lower"],
-        gc_upper=config["gc_upper"],
         TF_prior_beta_b=config["TF_prior_n"],
         t_phi_lb_scale=config["t_phi_lb_scale"],
     conda:

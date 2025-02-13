@@ -21,3 +21,5 @@ workflow/scripts/models/tf_postop_2cat.rds
 workflow/scripts/models/tf_postop_3cat.rds
 workflow/scripts/models/tf_preop_2cat.rds
 workflow/scripts/models/tf_preop_3cat.rds
+workflow/scripts/models/tf_postop.rds
+workflow/scripts/models/tf_preop.rds

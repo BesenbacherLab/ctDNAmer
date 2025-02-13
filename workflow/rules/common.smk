@@ -73,7 +73,7 @@ def get_fileformat(file_list, sample_type, sample_ID):
         sys.exit(f'More than 1 type of input files for {sample_type} data; sample_ID: {sample_ID}')
     else:
         file_suffix = list(file_suf)[0]
-        if file_suffix == "BAM":
+        if file_suffix == "bam":
             file_format = "bam"
         else:
             file_format = "q"
