@@ -71,7 +71,7 @@ OUTPUT_C.extend(UT_ANNOT_CFDNA)
 
 # modeling output 
 PREOP_TF = expand(
-    "results/patients/{pt}/{preop_cfDNA_ID}/tf_estimation//preop_tf_estimate.csv", zip, 
+    "results/patients/{pt}/{preop_cfDNA_ID}/tf_estimation/preop_tf_estimate.csv", zip, 
     pt=preop_units.sample_ID.tolist(), preop_cfDNA_ID=preop_units.index.tolist()
     )
 
