@@ -170,7 +170,7 @@ rule create_intersection_tables:
     script:
         "../scripts/gc_content_count_table_noise_kmers.py"
 
-'''
+
 rule model_empirical_noise:
     input:
         UT_mdata="results/patients/{pt}/unique_tumor/UT_n_and_ci.txt",
@@ -197,4 +197,3 @@ rule model_empirical_noise:
         "../envs/R4_1.yaml"
     script:
         "../scripts/model_empirical_noise_stan.R"
-'''
