@@ -112,7 +112,7 @@ rule dump_cfDNA_iGL_intersection:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.count_lower} -cx{params.count_higher} -cs1000000000 2> {log}"
+        "kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}"
 
 
 rule create_cfDNA_indGL_intersection_GC_content_count_tables:

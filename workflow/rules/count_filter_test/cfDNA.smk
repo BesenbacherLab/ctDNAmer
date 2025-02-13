@@ -36,12 +36,12 @@ rule intersect_cfDNA_and_iGL_kmers:
         i1_suf_rm="results/patients/{pt}/{cfDNA_ID}/kmers",
         i2_suf_rm=lambda wildcards: str("results/patients/" + str(wildcards.pt) + "/germline/kmers"),
         o_suf_rm="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc",
-        count_lower1="1",
-        count_lower2="1",
+        c_lower1="1",
+        c_lower2="1",
     conda:
         "../../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools -t{threads} -v simple {params.i1_suf_rm} -ci{params.count_lower1} -cx1000000000 {params.i2_suf_rm} -ci{params.count_lower2} -cx1000000000 intersect {params.o_suf_rm} -ci1 -cs1000000000 -cx1000000000 -ocleft 2> {log}"
+        "kmc_tools -t{threads} -v simple {params.i1_suf_rm} -ci{params.c_lower1} -cx1000000000 {params.i2_suf_rm} -ci{params.c_lower2} -cx1000000000 intersect {params.o_suf_rm} -ci1 -cs1000000000 -cx1000000000 -ocleft 2> {log}"
 
 
 rule dump_cfDNA_iGL_intersection:
@@ -57,12 +57,12 @@ rule dump_cfDNA_iGL_intersection:
         "logs/patients/{pt}/{cfDNA_ID}/dump_cfDNA_iGL_intersection.out"
     params:
         input_suf_rm="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc",
-        count_lower="2",
-        count_higher=config["count_UB"],
+        c_lower="2",
+        c_higher=config["count_UB"],
     conda:
         "../../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.input_suf_rm} -ci{params.count_lower} -cx{params.count_higher} dump {output.dump} -ci{params.count_lower} -cx{params.count_higher} -cs1000000000 2> {log}"
+        "kmc_tools transform {params.input_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}"
 
 
 rule create_cfDNA_indGL_intersection_GC_content_count_tables:
