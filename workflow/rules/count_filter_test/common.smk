@@ -21,8 +21,6 @@ units = pd.read_table(config["samples_cfDNA"]).set_index("cfDNA_ID", drop=False)
 validate(units, schema="../../schemas/units_count_filter_test.schema.yaml")
 
 preop_units = units.loc[units["timepoint"] <= 0, :].copy()
-preop_units["preop_tf_path"] = preop_units.apply(lambda row: f"results/patients/{row.sample_ID}/{row.name}/tf_estimation/3cat/preop_tf_estimate.csv", axis = 1)
-
 postop_index = units.groupby(['sample_ID'])['timepoint'].transform("max") == units['timepoint']
 postop_units = units[postop_index]
 postop_units.set_index("sample_ID", drop=False)
@@ -77,7 +75,7 @@ def get_fileformat(file_list, sample_type, sample_ID):
         sys.exit(f'More than 1 type of input files for {sample_type} data; sample_ID: {sample_ID}')
     else:
         file_suffix = list(file_suf)[0]
-        if file_suffix == "BAM":
+        if file_suffix.lower() == "bam":
             file_format = "bam"
         else:
             file_format = "q"

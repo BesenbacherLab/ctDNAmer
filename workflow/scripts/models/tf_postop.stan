@@ -1,6 +1,7 @@
 data{
     int n; // number of UT k-mers
     int n_wt_p; //sample size w_t prior
+    real cfDNA_mean_gc[n]; // mean k-mer count in cfDNA sample, gc-content stratified
     real cfDNA_mean; // mean k-mer count in cfDNA sample
     real noise_mu; // noise negbin mu parameter
     real noise_phi; // noise negbin phi parameter
@@ -31,9 +32,9 @@ model{
     
     for (i in 1:n){
         vector[3] contributions;
-        contributions[1] = log(w_t) + neg_binomial_2_lpmf(c_cfDNA[i] | TF*cfDNA_mean, t_phi);
-        contributions[2] = log(w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | gl_comp_mean*cfDNA_mean, gl_phi);
-        contributions[3] = log(1 - w_t - w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | noise_mu*cfDNA_mean, noise_phi);
+        contributions[1] = log(w_t) + neg_binomial_2_lpmf(c_cfDNA[i] | TF*cfDNA_mean_gc[i], t_phi);
+        contributions[2] = log(w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | gl_comp_mean*cfDNA_mean_gc[i], gl_phi);
+        contributions[3] = log(1 - w_t - w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | noise_mu*cfDNA_mean_gc[i], noise_phi);
         
         target += log_sum_exp(contributions);
     }
@@ -54,9 +55,9 @@ generated quantities {
     
     for (i in 1:n) {
         vector[3] contr;
-        contr[1] = log(w_t) + neg_binomial_2_lpmf(c_cfDNA[i] | TF*cfDNA_mean, t_phi);
-        contr[2] = log(w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | gl_comp_mean*cfDNA_mean, gl_phi);
-        contr[3] = log(1 - w_t - w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | noise_mu*cfDNA_mean, noise_phi);
+        contr[1] = log(w_t) + neg_binomial_2_lpmf(c_cfDNA[i] | TF*cfDNA_mean_gc[i], t_phi);
+        contr[2] = log(w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | gl_comp_mean*cfDNA_mean_gc[i], gl_phi);
+        contr[3] = log(1 - w_t - w_gl) + neg_binomial_2_lpmf(c_cfDNA[i] | noise_mu*cfDNA_mean_gc[i], noise_phi);
         log_lik[i] = log_sum_exp(contr);
 
         post_prob_t[i] = exp(contr[1] - log_sum_exp(contr)); 

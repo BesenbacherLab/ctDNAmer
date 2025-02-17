@@ -95,3 +95,62 @@ rule calculate_cfDNA_iGL_intersection_mean:
         "../envs/R4_1.yaml"
     script:
         "../scripts/calculate_cfDNA_mean_count.R"
+
+
+rule dump_cfDNA_iGL_intersection:
+    input:
+        int_sec="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.kmc_pre",
+        int_sec_suf="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.kmc_suf",
+    output:
+        dump=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.txt"),
+    resources:
+        mem_mb=10000,
+        runtime=lambda wildcards, attempt: attempt * 180,
+    log:
+        "logs/patients/{pt}/{cfDNA_ID}/dump_cfDNA_iGL_intersection.out"
+    params:
+        i_suf_rm="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc",
+        c_lower="2",
+        c_higher=str(config["count_UB"]),
+    conda:
+        "../envs/kmc3_2.yaml"
+    shell:
+        "kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}"
+
+
+rule create_cfDNA_indGL_intersection_GC_content_count_tables:
+    input:
+        kmers="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.txt",
+    output:
+        count_table="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_gc_content_counts.txt",
+    resources:
+        mem_mb=10000,
+        runtime=lambda wildcards, attempt: attempt * 1440,
+    log:
+        "logs/patients/{pt}/{cfDNA_ID}/create_cfDNA_indGL_intersection_GC_content_count_tables.out"
+    params:
+        k=k(),
+        max_count=config["count_UB"],
+    conda:
+        "../envs/R4_1.yaml"
+    script:
+        "../scripts/gc_content_count_table.py"
+
+
+rule calculate_cfDNA_iGL_intersection_mean_gc_strat:
+    input:
+        data="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_gc_content_counts.txt",
+    output:
+        cfDNA_mean_gc_strat="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv",
+    resources:
+        mem_mb=10000,
+        runtime=lambda wildcards, attempt: attempt * 180,
+    log:
+        "logs/patients/{pt}/{cfDNA_ID}/calculate_cfDNA_iGL_intersection_mean_gc_strat.out"
+    params:
+        max_count=1000,
+        max_cutoff=config["count_UB"],
+    conda:
+        "../envs/R4_1.yaml"
+    script:
+        "../scripts/calculate_cfDNA_mean_count_gc_strat.R"

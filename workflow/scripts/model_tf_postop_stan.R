@@ -12,6 +12,10 @@ rstan_options(auto_write = TRUE)
 mod = snakemake@input[["mod"]]
 
 #### input parameters
+## general
+gc_lower <- as.integer(snakemake@params[["gc_lower"]])
+gc_upper <- as.integer(snakemake@params[["gc_upper"]])
+print(paste0("GC content cutoffs: ", gc_lower, ", ", gc_upper))
 
 ## pre-treatment/baseline (ctDNA-positive) cfDNA sample parameter estimates
 preop_estimates <- read.csv(snakemake@input[["preop_est"]])
@@ -63,6 +67,7 @@ colnames(data) <- c("kmer", "tumor", "gc_content", "cfDNA")
 n_UT <- nrow(data)
 print(paste0("Total number of UT k-mers: ", n_UT))
 
+
 ## set tumor component weight prior sample sample size (scaled accordingly, if dependent on the input data size)
 if (wt_prior_n == "n_UT"){
     wt_prior_n = n_UT
@@ -72,10 +77,17 @@ if (wt_prior_n == "n_UT"){
 print(paste0("Tumor component weight prior distribution sample size: ", wt_prior_n))
 n_wt_p = wt_prior_n
 
-## cfDNA mean count
-f <- snakemake@input[["cfDNA_mean"]]
-cfDNA_mean_df <- read.table(f, header = T, sep = ",") 
-cfDNA_mean  <- cfDNA_mean_df$mean[1]
+## cfDNA mean gc stratified
+f <- snakemake@input[["cfDNA_mean_gc"]]
+cfDNA_mean_df_gc <- read.table(f, header = T, sep = ",") 
+cfDNA_mean_df_gc <- cfDNA_mean_df_gc |> 
+    filter(between(as.numeric(gc_content), gc_lower, gc_upper)) |> 
+    select(gc_content, mean, var)
+data <- left_join(data, cfDNA_mean_df_gc, by = c("gc_content"))
+
+# cfDNA maximum mean value across included GC contents]
+cfDNA_max_mean_gc <- cfDNA_mean_df_gc %>% filter(mean == max(mean))
+cfDNA_max_mean_gc  <- cfDNA_max_mean_gc$mean[1]
 
 ######################### 3-component mixture model #########################
 
@@ -84,7 +96,8 @@ data_list = list(n = n_UT,
                  n_wt_p = n_wt_p,
                  noise_mu = noise_mu, 
                  noise_phi = noise_phi,
-                 cfDNA_mean = cfDNA_mean, 
+                 cfDNA_mean_gc = data$mean, 
+                 cfDNA_mean = cfDNA_max_mean_gc, 
                  c_cfDNA = data$cfDNA,
                  max_count_cfDNA_p1 = max(data$cfDNA) + 1,
                  t_phi_lb_scale = t_phi_lb_scale,
@@ -94,12 +107,12 @@ data_list = list(n = n_UT,
                  gl_phi = gl_phi, 
                  TF_prior_beta_b = TF_prior_beta_b, 
                  gl_comp_mean = gl_comp_mean, 
-                 t_phi_a = 1, 
+                 t_phi_a = 1,
                  t_phi_b = 1)
 
 # set initial values
 initf1 <- function() {list("TF" = 1e-5,
-                           "t_phi" = runif(1, (cfDNA_mean*1e-5)**2/((cfDNA_mean*1e-5*t_phi_lb_scale) - (cfDNA_mean*1e-5)), 100),
+                           "t_phi" = runif(1, (cfDNA_max_mean_gc*1e-5)**2/((cfDNA_max_mean_gc*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_gc*1e-5)), 100),
                            "w_t" = runif(1, wT_lb, 1))} 
 
 
@@ -138,7 +151,8 @@ if (TF_n_eff < 1000 | tphi_n_eff < 1000){
                     n_wt_p = n_wt_p,
                     noise_mu = noise_mu, 
                     noise_phi = noise_phi,
-                    cfDNA_mean = cfDNA_mean, 
+                    cfDNA_mean_gc = data$mean, 
+                    cfDNA_mean = cfDNA_max_mean_gc, 
                     c_cfDNA = data$cfDNA,
                     max_count_cfDNA_p1 = max(data$cfDNA) + 1,
                     t_phi_lb_scale = t_phi_lb_scale, 
@@ -153,7 +167,7 @@ if (TF_n_eff < 1000 | tphi_n_eff < 1000){
 
     # set initial values
     initf1 <- function() {list("TF" = 1e-5,
-                            "t_phi" = runif(1, (cfDNA_mean*1e-5)**2/((cfDNA_mean*1e-5*t_phi_lb_scale) - (cfDNA_mean*1e-5)), 100),
+                            "t_phi" = runif(1, (cfDNA_max_mean_gc*1e-5)**2/((cfDNA_max_mean_gc*1e-5*t_phi_lb_scale) - (cfDNA_max_mean_gc*1e-5)), 100),
                             "w_t" = runif(1, wT_lb, 1))} 
 
 
