@@ -83,7 +83,7 @@ cfDNA_mean_df_gc <- cfDNA_mean_df_gc |>
 data <- left_join(data, cfDNA_mean_df_gc, by = c("gc_content"))
 
 # cfDNA maximum mean value across included GC contents]
-cfDNA_max_df_gc <- cfDNA_mean_df_gc %>% filter(mean == max(mean))
+cfDNA_max_df_gc <- cfDNA_mean_df_gc |> filter(mean == max(mean))
 cfDNA_max_mean_gc  <- cfDNA_max_df_gc$mean[1]
 cfDNA_max_var_gc  <- cfDNA_max_df_gc$var[1]
 

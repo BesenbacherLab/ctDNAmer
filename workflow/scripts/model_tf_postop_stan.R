@@ -24,9 +24,6 @@ preop_estimates <- read.csv(snakemake@input[["preop_est"]])
 TF_prior_beta_b <- as.integer(snakemake@params[["TF_prior_beta_b"]])
 print(paste0("Tumor fraction prior Beta distribution b parameter (sets the prior sample size): ", TF_prior_beta_b))
 
-wt_prior_n <- 100
-print(paste0("Tumor component weight sample size: ", wt_prior_n))
-
 wt_prior_n_scale <- 1/1
 print(paste0("Tumor component weight sample size scale (used in case the prior sample size is made dependent on input data size with wt_prior_n = n_UT_scale): ", wt_prior_n_scale))
 
@@ -67,13 +64,7 @@ colnames(data) <- c("kmer", "tumor", "gc_content", "cfDNA")
 n_UT <- nrow(data)
 print(paste0("Total number of UT k-mers: ", n_UT))
 
-
-## set tumor component weight prior sample sample size (scaled accordingly, if dependent on the input data size)
-if (wt_prior_n == "n_UT"){
-    wt_prior_n = n_UT
-} else if (wt_prior_n == "n_UT_scale"){
-    wt_prior_n = round(n_UT*wt_prior_n_scale)
-}
+wt_prior_n <- 100
 print(paste0("Tumor component weight prior distribution sample size: ", wt_prior_n))
 n_wt_p = wt_prior_n
 

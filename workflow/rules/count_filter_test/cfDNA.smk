@@ -148,7 +148,6 @@ rule calculate_cfDNA_iGL_intersection_mean_gc_strat:
     log:
         "logs/patients/{pt}/{cfDNA_ID}/calculate_cfDNA_iGL_intersection_mean_gc_strat.out"
     params:
-        max_count=1000,
         max_cutoff=config["count_UB"],
     conda:
         "../envs/R4_1.yaml"

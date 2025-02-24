@@ -5,7 +5,6 @@ library(tidyverse)
 library(stringr)
 
 # input parameters
-max_count <- snakemake@params[["max_count"]]
 max_cutoff <- snakemake@params[["max_cutoff"]]
 
 # input data
@@ -22,7 +21,7 @@ for (gc in unique(gc_data$GC)){
     d$count <- as.numeric(d$count)
 
     # find minimum position (count with the smallest number of k-mers) between noise and signal distributions (lower cutoff)
-    d_minimal <- d %>% filter(between(count, 1, max_count))
+    d_minimal <- d %>% filter(between(count, 1, max_cutoff))
     d_minimal$count <- as.numeric(d_minimal$count)
     min_btwn_peaks <- round(optimize(approxfun(d_minimal$count,d_minimal$n_kmers),interval=c(1,10))$minimum)
     # find the mode of the signal distribution (distribution with the higher mode) 
