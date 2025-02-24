@@ -83,7 +83,7 @@ rule intersect_UT_and_donor_kmers:
         int_donor_c_suf=temp("results/patients/{pt}/empirical_noise/{donor}/donor_counts.kmc_suf"),
     resources:
         mem_mb=20000,
-        runtime=lambda wildcards, attempt: attempt * 1440,
+        runtime=lambda wildcards, attempt: attempt * 360,
     log:
         "logs/patients/{pt}/empirical_noise/intersect_UT_and_{donor}_donor_kmers.out"
     params:
