@@ -19,7 +19,7 @@ rule count_germline_kmers:
         'kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.input_format} @{input.input_files} {params.ou_suf_rm} {params.tmpdir} 2> {log}'
 
 
-if config["tumor_fileformat"] == "bam":
+if config["tumor_fileformat"].upper() == "BAM":
     rule quality_filter_tumor_bam:
         input:
             unpack(get_tumor_input),

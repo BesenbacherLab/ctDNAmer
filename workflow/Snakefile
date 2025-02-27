@@ -61,7 +61,7 @@ CFDNA_MEAN_GC = expand(
     "results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv", zip, 
     pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
     )
-OUTPUT_C.extend(CFDNA_MEAN+CFDNA_MEAN_GC)
+OUTPUT_C.extend(CFDNA_MEAN)
 
 # ut annotation output
 UT_ANNOT_CFDNA = expand(

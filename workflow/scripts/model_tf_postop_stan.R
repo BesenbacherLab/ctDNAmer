@@ -17,6 +17,11 @@ gc_lower <- as.integer(snakemake@params[["gc_lower"]])
 gc_upper <- as.integer(snakemake@params[["gc_upper"]])
 print(paste0("GC content cutoffs: ", gc_lower, ", ", gc_upper))
 
+wT_lb = 0.01
+n_wt_p = 100
+t_phi_b_input = 1
+gl_comp_mean = 1/2
+
 ## pre-treatment/baseline (ctDNA-positive) cfDNA sample parameter estimates
 preop_estimates <- read.csv(snakemake@input[["preop_est"]])
 
@@ -24,22 +29,13 @@ preop_estimates <- read.csv(snakemake@input[["preop_est"]])
 TF_prior_beta_b <- as.integer(snakemake@params[["TF_prior_beta_b"]])
 print(paste0("Tumor fraction prior Beta distribution b parameter (sets the prior sample size): ", TF_prior_beta_b))
 
-wt_prior_n_scale <- 1/1
-print(paste0("Tumor component weight sample size scale (used in case the prior sample size is made dependent on input data size with wt_prior_n = n_UT_scale): ", wt_prior_n_scale))
-
 t_phi_lb_scale <- as.numeric(snakemake@params[["t_phi_lb_scale"]])
 print(paste0("Tumor component phi parameter lower bound scaling factor: ", t_phi_lb_scale))
 
 wT_mean = preop_estimates$wt_mean[1]
 print(paste0("Tumor component weight prior mean (baseline cfDNA sample weight estimate): ", wT_mean))
 
-wT_lb = wT_mean/2
-print(paste0("Tumor component weight lower bound (mean between the prior weight mean and 0): ", wT_lb))
-
 ## germline component
-gl_comp_mean <- 1/2
-print(paste0("Germline component mean scaling factor: ", gl_comp_mean))
-
 # germline component weight and variance scaling parameter baseline/pre-treatment (ctDNA-positive sample) estimates
 w_gl <- preop_estimates$wgl_mean[1]
 print(paste0("Germline component weight: ", w_gl))
@@ -64,9 +60,6 @@ colnames(data) <- c("kmer", "tumor", "gc_content", "cfDNA")
 n_UT <- nrow(data)
 print(paste0("Total number of UT k-mers: ", n_UT))
 
-wt_prior_n <- 100
-print(paste0("Tumor component weight prior distribution sample size: ", wt_prior_n))
-n_wt_p = wt_prior_n
 
 ## cfDNA mean gc stratified
 f <- snakemake@input[["cfDNA_mean_gc"]]
@@ -79,6 +72,19 @@ data <- left_join(data, cfDNA_mean_df_gc, by = c("gc_content"))
 # cfDNA maximum mean value across included GC contents]
 cfDNA_max_mean_gc <- cfDNA_mean_df_gc %>% filter(mean == max(mean))
 cfDNA_max_mean_gc  <- cfDNA_max_mean_gc$mean[1]
+
+
+data_f_a0 <- data |> filter(cfDNA > 0)
+if (nrow(data_f_a0) > 0){
+    UT_cfDNA_a0_mean <- mean(data_f_a0$cfDNA)
+    if (UT_cfDNA_a0_mean > 0.5*cfDNA_max_mean_gc){
+        print("UT k-mers observed in cfDNA mean above the cfDNA total mean, ctDNA expected to be present, relaxing model priors")
+        t_phi_b_input = 100
+        TF_prior_beta_b = 10
+        n_wt_p = 10
+        t_phi_lb_scale = 100 
+    }
+}
 
 ######################### 3-component mixture model #########################
 
@@ -99,7 +105,7 @@ data_list = list(n = n_UT,
                  TF_prior_beta_b = TF_prior_beta_b, 
                  gl_comp_mean = gl_comp_mean, 
                  t_phi_a = 1,
-                 t_phi_b = 1)
+                 t_phi_b = t_phi_b_input)
 
 # set initial values
 initf1 <- function() {list("TF" = 1e-5,
@@ -154,7 +160,7 @@ if (TF_n_eff < 1000 | tphi_n_eff < 1000){
                     TF_prior_beta_b = TF_prior_beta_b, 
                     gl_comp_mean = gl_comp_mean, 
                     t_phi_a = 1, 
-                    t_phi_b = 100)
+                    t_phi_b = 1000)
 
     # set initial values
     initf1 <- function() {list("TF" = 1e-5,

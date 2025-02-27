@@ -20,12 +20,11 @@ rule model_tf_preop_cfDNA:
     params:
         gc_lower=config["gc_lower"],
         gc_upper=config["gc_upper"],
-        wT_mean=config["baseline_model"]["t_w_mean"],
-        wT_lb=config["baseline_model"]["t_w_lb"],
         TF_prior_beta_b=config["TF_prior_n"],
-        w_gl_prior_beta_b=config["baseline_model"]["gl_w_beta_b"],
         t_phi_lb_scale=config["t_phi_lb_scale"],
-        wt_prior_n_scale=config["baseline_model"]["t_w_prior_n_scale"],
+        wT_mean=config["baseline_model"]["t_w_mean"],
+        w_gl_prior_beta_b=config["baseline_model"]["gl_w_beta_b"],
+        wt_prior_n_scale=config["baseline_model"]["t_w_prior_n_scale"], 
     conda:
         "../envs/R4_1.yaml"
     script:

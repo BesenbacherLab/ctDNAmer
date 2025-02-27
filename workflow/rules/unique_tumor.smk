@@ -53,7 +53,7 @@ rule filter_germline_count_summary:
         "awk -F '\t' '$2!=0' {input.c_sum} > {output.c_sum_filt} 2> {log}"
 
 
-if config["tumor_fileformat"] == "BAM":
+if config["tumor_fileformat"].upper() == "BAM":
     rule quality_filter_tumor_bam:
         input:
             unpack(get_tumor_input),

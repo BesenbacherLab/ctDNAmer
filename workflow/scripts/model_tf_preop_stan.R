@@ -17,18 +17,18 @@ gc_lower <- as.integer(snakemake@params[["gc_lower"]])
 gc_upper <- as.integer(snakemake@params[["gc_upper"]])
 print(paste0("GC content cutoffs: ", gc_lower, ", ", gc_upper))
 
+wT_lb = 0.01
+wt_prior_n = "n_UT_scale"
+t_phi_b_input = 1
+gl_comp_mean = 1/2
+gl_phi_lb_scale = 1/1
+
 ## tumor component
 TF_prior_beta_b <- as.integer(snakemake@params[["TF_prior_beta_b"]])
 print(paste0("Tumor fraction prior Beta distribution b parameter (sets the prior sample size): ", TF_prior_beta_b))
 
 wT_mean <- as.numeric(snakemake@params[["wT_mean"]])
 print(paste0("Tumor component weight prior mean: ", wT_mean))
-
-wT_lb <- as.numeric(snakemake@params[["wT_lb"]])
-print(paste0("Tumor component weight lower bound: ", wT_lb))
-
-wt_prior_n <- "n_UT_scale"
-print(paste0("Tumor component weight sample size: ", wt_prior_n))
 
 wt_prior_n_scale <- snakemake@params[["wt_prior_n_scale"]]
 print(paste0("Tumor component weight sample size scale (used in case the prior sample size is made dependent on input data size with wt_prior_n = n_UT_scale): ", wt_prior_n_scale))
@@ -41,11 +41,6 @@ print(paste0("Tumor component phi parameter lower bound scaling factor: ", t_phi
 w_gl_prior_beta_b <- as.integer(snakemake@params[["w_gl_prior_beta_b"]])
 print(paste0("Germline component weight prior Beta distribution b parameter (sets the prior sample size): ", w_gl_prior_beta_b))
 
-gl_comp_mean <- 1/2
-print(paste0("Germline component mean scaling factor: ", gl_comp_mean))
-
-gl_phi_lb_scale <- 1/1
-print(paste0("Germline component phi parameter lower bound scaling factor: ", gl_phi_lb_scale))
 
 ## noise component
 f <- snakemake@input[["noise_rate"]]
@@ -87,6 +82,19 @@ cfDNA_max_df_gc <- cfDNA_mean_df_gc |> filter(mean == max(mean))
 cfDNA_max_mean_gc  <- cfDNA_max_df_gc$mean[1]
 cfDNA_max_var_gc  <- cfDNA_max_df_gc$var[1]
 
+
+data_f_a0 <- data |> filter(cfDNA > 0)
+if (nrow(data_f_a0) > 0){
+    UT_cfDNA_a0_mean <- mean(data_f_a0$cfDNA)
+    if (UT_cfDNA_a0_mean > 0.5*cfDNA_max_mean_gc){
+        print("UT k-mers observed in cfDNA mean above 10, ctDNA expected to be present, relaxing model priors")
+        t_phi_b_input = 100
+        TF_prior_beta_b = 10
+        n_wt_p = 10
+        t_phi_lb_scale = 100
+    }
+}
+
 gl_phi_lb = (cfDNA_max_mean_gc**2)/((gl_phi_lb_scale*cfDNA_max_var_gc)-cfDNA_max_mean_gc)
 print(paste0("gl phi lower bound, estimated based on cfDNA variance (+ scaling): ", gl_phi_lb))
 
@@ -110,7 +118,7 @@ data_list = list(n = n_UT,
                 w_gl_prior_beta_b = w_gl_prior_beta_b, 
                 gl_comp_mean = gl_comp_mean, 
                 t_phi_a=1, 
-                t_phi_b=1)
+                t_phi_b=t_phi_b_input)
 
 # set initial values
 initf1 <- function() {list("TF" = 1e-5, 
@@ -166,7 +174,7 @@ if (TF_n_eff < 1000 | tphi_n_eff < 1000){
                     w_gl_prior_beta_b = w_gl_prior_beta_b, 
                     gl_comp_mean = gl_comp_mean, 
                     t_phi_a = 1, 
-                    t_phi_b = 100)
+                    t_phi_b = 1000)
 
     # set initial values
     initf1 <- function() {list("TF" = 1e-5, 

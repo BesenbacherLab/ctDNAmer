@@ -79,10 +79,6 @@ properties:
         type: number
         description: tumor component weight prior distribution mean
         default: 0.5
-      t_w_lb:
-        type: number
-        description: tumor component weight lower bound
-        default: 0.01
       gl_w_beta_b:
         type: integer
         description: germline component weight prior Beta distribution b parameter (also controls the sample size of the prior)

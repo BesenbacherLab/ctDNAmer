@@ -14,7 +14,6 @@ t_phi_lb_scale: 5
 
 baseline_model: 
   t_w_mean: 0.5
-  t_w_lb: 0.01
   gl_w_beta_b: 100
   t_w_prior_n_scale: 0.5
   
