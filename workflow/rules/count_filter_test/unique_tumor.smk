@@ -48,7 +48,7 @@ else:
         conda:
             "../../envs/py3_12.yaml"
         script:
-            "../scripts/quality_filter_tumor_fastq.sh"
+            "../../scripts/quality_filter_tumor_fastq.sh"
 
 
 rule count_tumor_kmers:

@@ -58,7 +58,7 @@ rule make_cfDNA_iGL_intersection_count_summary:
     params:
         i_suf_rm="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc",
     conda:
-        "../envs/kmc3_2.yaml"
+        "../../envs/kmc3_2.yaml"
     shell: 
         "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
 
@@ -74,7 +74,7 @@ rule filter_cfDNA_iGL_intersection_count_summary:
     log:
         "logs/patients/{pt}/{cfDNA_ID}/make_cfDNA_iGL_intersection_count_summary.out"
     conda:
-        "../envs/kmc3_2.yaml"
+        "../../envs/kmc3_2.yaml"
     shell:
         "awk -F '\t' '$2!=0' {input.c_sum} > {output.c_sum_filt} 2> {log}"
 
@@ -92,7 +92,7 @@ rule calculate_cfDNA_iGL_intersection_mean:
     params:
         max_count=1000,
     conda:
-        "../envs/R4_1.yaml"
+        "../../envs/R4_1.yaml"
     script:
         "../scripts/calculate_cfDNA_mean_count.R"
 
@@ -113,7 +113,7 @@ rule dump_cfDNA_iGL_intersection:
         c_lower="2",
         c_higher=str(config["count_UB"]),
     conda:
-        "../envs/kmc3_2.yaml"
+        "../../envs/kmc3_2.yaml"
     shell:
         "kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}"
 
@@ -132,7 +132,7 @@ rule create_cfDNA_indGL_intersection_GC_content_count_tables:
         k=k(),
         max_count=config["count_UB"],
     conda:
-        "../envs/R4_1.yaml"
+        "../../envs/R4_1.yaml"
     script:
         "../scripts/gc_content_count_table.py"
 
@@ -150,6 +150,6 @@ rule calculate_cfDNA_iGL_intersection_mean_gc_strat:
     params:
         max_cutoff=config["count_UB"],
     conda:
-        "../envs/R4_1.yaml"
+        "../../envs/R4_1.yaml"
     script:
         "../scripts/calculate_cfDNA_mean_count_gc_strat.R"
