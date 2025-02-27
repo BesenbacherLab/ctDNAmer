@@ -3,14 +3,6 @@ include: "rules/count_filter_test/common.smk"
 OUTPUT_C = []
 
 
-# cfDNA output
-CFDNA_MEAN_GC = expand(
-    "results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv", zip, 
-    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
-    )
-OUTPUT_C.extend(CFDNA_MEAN_GC)
-
-
 # modeling output
 PREOP_TF = expand( 
     "results/patients/{pt}/{preop_cfDNA_ID}/unique_tumor_count_filter_test/tf_estimation/preop_combined_tf_estimates.csv", zip, 
