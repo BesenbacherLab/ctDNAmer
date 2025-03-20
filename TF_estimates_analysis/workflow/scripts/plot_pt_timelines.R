@@ -252,7 +252,7 @@ p_nonrecur <- ggplot(data = data_ff) +
 
 sink()
 
-png(filename = snakemake@output[["recur_pt_timelines"]], width = 800, height = 1200)
+png(filename = snakemake@output[["recur_pt_timelines"]], width = 1000, height = 1000)
 print(p_recur)
 dev.off()
 
