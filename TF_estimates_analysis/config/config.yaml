@@ -1,0 +1,17 @@
+
+samples: config/samples.tsv
+samples_cfDNA: config/units.tsv
+donors: config/donors.tsv
+samples_count_filter_test: config/samples_count_filter_test.tsv
+units_count_filter_test: config/units_count_filter_test.tsv
+
+clinical_data: "../metadata/clin_data.csv"
+interventions: "../metadata/interventions.csv"
+imagings: "../metadata/imaging.csv"
+wgs_coverage_mean_and_sd: "../metadata/wgs_metrics.csv"
+
+cohort: "frfr"
+ctDNA_mers_dir: "./"
+subfd: "tf_estimation/" # tf_estimation/ is the default output subfolder in ctDNAmers
+clonalSNVs_dir: "../clonal_SNVs/"
+count_filter_test_results_dir: "./"

@@ -1,0 +1,54 @@
+
+
+include: "rules/common.smk"
+OUTPUT = []
+
+# ctDNAmers results aggregation
+CTDNAMERS_TF=[
+    "results/TF_estimates_analysis/ctDNAmers_TF/units_ctDNAmersTF.csv",
+    "results/TF_estimates_analysis/ctDNAmers_TF/units_ctDNAmersTF_ctDNA_det.csv"]
+OUTPUT.extend(CTDNAMERS_TF) 
+
+# clonal SNVs results aggregation 
+SNVS_TF=["results/TF_estimates_analysis/clonal_SNVs/units_clonalSNVsmeanAF.csv",
+    "results/TF_estimates_analysis/clonal_SNVs/units_clonal_SNVs_ctDNA_det.csv"
+    ]
+OUTPUT.extend(SNVS_TF) 
+
+# count filter test results analysis
+OUTPUT.append("results/TF_estimates_analysis/plots/count_filter_test_TF_estimates.png") 
+
+# cfDNA kmers mean counts vs WGS sequencing coverage
+OUTPUT.append("results/TF_estimates_analysis/plots/cfDNA_kmer_mean_vs_seq_cov_mean.png") 
+
+# empirical noise
+EMP_NOISE=[
+    "results/TF_estimates_analysis/plots/emp_noise_data.png",
+    "results/TF_estimates_analysis/plots/emp_noise_estimates.png"
+    ]
+OUTPUT.extend(EMP_NOISE)
+
+# ctDNAmers TF estimates summary and lead time
+TF_SUM=["results/TF_estimates_analysis/plots/ctDNAmers_TF_estimates_summary.png",
+    "results/TF_estimates_analysis/plots/ctDNAmers_lead_time.png"
+    ]
+OUTPUT.extend(TF_SUM)
+
+# comp to clonal SNVs mean allele frequency
+OUTPUT.append("results/TF_estimates_analysis/plots/clonalSNVs_ctDNAmers_recur_pt_timelines.png")
+OUTPUT.append("results/TF_estimates_analysis/plots/clonalSNVs_ctDNAmers_ROC.png")
+
+
+##### Target rules #####
+rule all:
+    input:
+        OUTPUT
+
+
+##### Modules #####
+include: "rules/format_sample_units.smk"
+include: "rules/count_filter_test_results.smk" 
+include: "rules/cfDNA_mean_and_cov_comp.smk" 
+include: "rules/emp_noise_analysis.smk" 
+include: "rules/ctDNAmers_results_analysis.smk"
+include: "rules/compare_clonalSNVs.smk"

@@ -50,7 +50,7 @@ rule model_tf_postop_cfDNA:
         runtime=lambda wildcards, attempt: attempt * 360,
     threads: 4
     log:
-        "logs/patients/{pt}/{postop_cfDNA_ID}/model_tf_postop_.out"
+        "logs/patients/{pt}/{postop_cfDNA_ID}/highUTcfDNAmean_nwtp2/model_tf_postop_.out"
     params:
         gc_lower=config["gc_lower"],
         gc_upper=config["gc_upper"],

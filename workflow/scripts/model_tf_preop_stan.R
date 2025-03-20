@@ -90,7 +90,7 @@ if (nrow(data_f_a0) > 0){
         print("UT k-mers observed in cfDNA mean above 10, ctDNA expected to be present, relaxing model priors")
         t_phi_b_input = 100
         TF_prior_beta_b = 10
-        n_wt_p = 10
+        n_wt_p = 2
         t_phi_lb_scale = 100
     }
 }

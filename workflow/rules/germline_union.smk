@@ -58,6 +58,7 @@ rule loop_union_germline:
         get_glu_input,
     output:
         combined_file=temp("results/germline_union/germline_union_{glu_samples_comb}.kmc_pre"),
+        combined_file_suf=temp("results/germline_union/germline_union_{glu_samples_comb}.kmc_suf"),
     resources:
         mem_mb=10000,
         runtime=lambda wildcards, attempt: attempt * 720,
