@@ -27,7 +27,7 @@ The workflow requires Snakemake 8.0.0 or above and uses conda for package manage
 ### Input data
 
 Patient data can be specified in the ``config/samples.tsv`` configuration file. For each patient, primary tumor and matched germline WGS data BAM files are required along with a variant set called with Mutect2 [2]. 
-``Samples.tsv`` can also be used to define tumor purity and ploidy ranges for Sequenza and VAF cutoffs for candidate SNVs filtering. The default values for these parameters can be found in the [samples schema](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/workflow/schemas/samples.schema.yaml). 
+``Samples.tsv`` can also be used to define tumor purity and ploidy ranges for Sequenza and VAF cutoffs for candidate SNVs filtering. The default values for these parameters can be found in the [samples schema](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/workflow/schemas/samples.schema.yaml). 
 
 The ``config/config.yaml`` file specifies the name and FASTA file path of the reference genome where the samples are aligned to. 
 For variant annotation, the workflow uses Ensembl Variant Effect Predictor (VEP) [3]. The transcript models file (cache) needs to be downloaded before using the workflow and the path to the cache needs to be specified in ``config.yaml``.
@@ -57,13 +57,13 @@ conda activate snakemake
 Download and extract the parent repository: 
 
 ```
-git clone https://github.com/carmenoroperv/ctDNA_mers.git && cd ctDNA_mers/clonalSNVs_tracking
+git clone https://github.com/BesenbacherLab/ctDNAmer.git && cd ctDNA_mers/clonalSNVs_tracking
 ```
 
 ### Step 3: Configure workflow 
 
 #### Workflow confifuration
-To specify the parameters for running the workdlow and the sample paths, modify the configuration files [`config.yaml`](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/config/config.yaml), [`samples.tsv`](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/config/samples.tsv) and [`units.tsv`](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/config/units.tsv) according to your needs, following the explanations provided [here](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/config).
+To specify the parameters for running the workdlow and the sample paths, modify the configuration files [`config.yaml`](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/config/config.yaml), [`samples.tsv`](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/config/samples.tsv) and [`units.tsv`](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/config/units.tsv) according to your needs, following the explanations provided [here](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/config).
 
 ### Step 4: Run workflow 
 
@@ -71,7 +71,7 @@ To specify the parameters for running the workdlow and the sample paths, modify 
 
 For cluster execution of the workflow, the [snakemake slurm executor plugin](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html) needs to be installed with `pip install snakemake-executor-plugin-slurm`. If the slurm plugin is not installed, the `-e` flag needs to be specified for the snakemake commands listed below. 
 
-The specifics for cluster execution should be defined in the workflow profile configuration file. An example workflow profile for slurm is provided [here](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/workflow/profiles/default/config.yaml). To use the example profile, adjust the snakemake command line parameters to your needs. Importantly, a cluster account is specified in the example profile as an environment variable. To set the account name as an environment variable run `export ACCOUNT_NAME=<your_account_name>` or modify the profile config file to include your account name directly.
+The specifics for cluster execution should be defined in the workflow profile configuration file. An example workflow profile for slurm is provided [here](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/workflow/profiles/default/config.yaml). To use the example profile, adjust the snakemake command line parameters to your needs. Importantly, a cluster account is specified in the example profile as an environment variable. To set the account name as an environment variable run `export ACCOUNT_NAME=<your_account_name>` or modify the profile config file to include your account name directly.
 
 
 After you have activated the conda environment with snakemake, installed the slurm executor plugin and set the account name as an environment variable, you can test the workflow remote execution by performing a dry-run:
@@ -86,7 +86,7 @@ To run the workflow for a new data set, use the `--directory` flag that specifie
 snakemake --directory "path/to/new/directory/"
 ```
 
-The workflow profile that specifies the details for the cluster execution will be still automatically detected from the pipeline directory ([`workflow/profiles/default/config.yaml`](https://github.com/carmenoroperv/ctDNA_mers/tree/main/clonalSNVs_tracking/workflow/profiles/default/config.yaml)) even when the execution directory is changed. If you want to specify a new cluster execution profile as well, use the `--workflow-profile` flag: 
+The workflow profile that specifies the details for the cluster execution will be still automatically detected from the pipeline directory ([`workflow/profiles/default/config.yaml`](https://github.com/BesenbacherLab/ctDNAmer/tree/main/clonalSNVs_tracking/workflow/profiles/default/config.yaml)) even when the execution directory is changed. If you want to specify a new cluster execution profile as well, use the `--workflow-profile` flag: 
 
 ```
 snakemake --workflow-profile "path/to/workflow_profile/config.yaml"
