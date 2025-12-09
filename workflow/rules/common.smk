@@ -35,6 +35,10 @@ glu_sample_nr = [str(x) for x in range(1, len(samples_glu.index.tolist()) + 1)]
 glu_combinations = ["1_" + str(x) for x in range(2, len(samples_glu.index.tolist()) + 1)]
 glu_codes_dict = dict(zip(glu_sample_nr, samples_glu.index.tolist()))
 
+if "glu_path" in config: 
+    glu_path = config["glu_path"]
+else: 
+    glu_path = False
 
 ###### Helper functions #####
 def k():
@@ -147,7 +151,10 @@ def get_final_glu():
     """
     Germline union path
     """
-    return f"results/germline_union/final_germline_union_{glu_combinations[-1]}.kmc_pre"
+    if glu_path: 
+        return glu_path
+    else: 
+        return f"results/germline_union/final_germline_union_{glu_combinations[-1]}.kmc_pre"
 
 
 def get_germline_input(wildcards):

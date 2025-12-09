@@ -16,7 +16,20 @@ rule count_germline_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        'kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} {params.o_suf_rm} {params.tmpdir} 2> {log}'
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+        scratch_kmctmp=/scratch/$SLURM_JOBID/temp_kmc/
+    
+        mkdir ${{scratch_kmctmp}}
+
+        kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} ${{scratch_kmers}} ${{scratch_kmctmp}} 2> {log}
+
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        rm -r ${{scratch_kmctmp}}
+        '''
 
 
 rule make_germline_count_summary:
@@ -34,7 +47,16 @@ rule make_germline_count_summary:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
+
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram ${{scratch_kmers}} -ci1 -cx1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.c_sum}
+        '''
+
 
 
 rule filter_germline_count_summary:
@@ -103,7 +125,20 @@ rule count_tumor_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        'kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} {params.o_suf_rm} {params.tmpdir} 2> {log}'
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+        scratch_kmctmp=/scratch/$SLURM_JOBID/temp_kmc/
+    
+        mkdir ${{scratch_kmctmp}}
+
+        kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} ${{scratch_kmers}} ${{scratch_kmctmp}} 2> {log}
+
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        rm -r ${{scratch_kmctmp}}
+        '''
 
 
 rule make_tumor_count_summary:
@@ -121,7 +156,15 @@ rule make_tumor_count_summary:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
+
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram ${{scratch_kmers}} -ci1 -cx1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.c_sum}
+        '''
 
 
 rule filter_tumor_count_summary:
@@ -177,7 +220,16 @@ rule subtract_individual_germline_from_tumor:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools simple {params.i_t_suf_rm} -ci1 -cx1000000000 {params.i_gl_suf_rm} -ci1 -cx1000000000 kmers_subtract {params.o_suf_rm} -ci{params.ci_out} -cx{params.cx_out} -cs1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+
+        kmc_tools simple {params.i_t_suf_rm} -ci1 -cx1000000000 {params.i_gl_suf_rm} -ci1 -cx1000000000 kmers_subtract ${{scratch_kmers}} -ci{params.ci_out} -cx{params.cx_out} -cs1000000000 2> {log}
+        
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        '''
 
 
 rule make_tumor_sub_indGL_count_summary:
@@ -196,7 +248,15 @@ rule make_tumor_sub_indGL_count_summary:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
+
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram ${{scratch_kmers}} -ci1 -cx1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.c_sum}
+        '''
 
 
 rule filter_tumor_sub_indGL_count_summary:
@@ -221,8 +281,8 @@ rule subtract_germline_union_from_tumor:
         tumor_suf="results/patients/{pt}/unique_tumor/tumor_sub_indGL.kmc_suf",
         germline=get_final_glu(),
     output:
-        diff_pre=temp("results/patients/{pt}/unique_tumor/UT.kmc_pre"),
-        diff_suf=temp("results/patients/{pt}/unique_tumor/UT.kmc_suf"),
+        diff_pre="results/patients/{pt}/unique_tumor/UT.kmc_pre",
+        diff_suf="results/patients/{pt}/unique_tumor/UT.kmc_suf",
     resources:
         mem_mb=50000,
         runtime=lambda wildcards, attempt: attempt * 720,
@@ -237,7 +297,16 @@ rule subtract_germline_union_from_tumor:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools simple {params.i_t_suf_rm} -ci1 -cx1000000000 {params.i_gl_suf_rm} -ci1 -cx1000000000 kmers_subtract {params.o_suf_rm} -ci{params.ci_out} -cx{params.cx_out} -cs1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+
+        kmc_tools simple {params.i_t_suf_rm} -ci1 -cx1000000000 {params.i_gl_suf_rm} -ci1 -cx1000000000 kmers_subtract ${{scratch_kmers}} -ci{params.ci_out} -cx{params.cx_out} -cs1000000000 2> {log}
+        
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        '''
 
 
 rule make_tumor_sub_indGL_and_GLU_count_summary:
@@ -256,7 +325,15 @@ rule make_tumor_sub_indGL_and_GLU_count_summary:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
+
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram ${{scratch_kmers}} -ci1 -cx1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.c_sum}
+        '''
 
 
 rule filter_tumor_sub_indGL_and_GLU_count_summary:
@@ -293,7 +370,15 @@ rule dump_ut_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
+
+        kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump ${{scratch_kmers}} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.dump}
+        '''
 
 
 rule filter_ut_kmers:

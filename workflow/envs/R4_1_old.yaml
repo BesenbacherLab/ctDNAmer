@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.4.3
+  - r-tidyverse=2.0.0
+  - r-coda=0.19_4.1
+  - r-rstan=2.32.6
+  - r-stanheaders=2.32.10=r44he59cc3e_1

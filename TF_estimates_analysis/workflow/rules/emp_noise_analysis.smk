@@ -7,7 +7,7 @@ rule plot_emp_noise_data: # SF1, SF4B
         units=config["samples_cfDNA"],
         clin_data=config["clinical_data"],
     output:
-        emp_noise_data="results/TF_estimates_analysis/plots/emp_noise_data.png",
+        emp_noise_data=f"{pref}/TF_estimates_analysis/plots/{cohort}/emp_noise_data.png",
     resources:
         mem_mb=1000,
         runtime=lambda wildcards, attempt: attempt * 180,
@@ -26,7 +26,7 @@ rule plot_emp_noise_estimates: # SF2, SF4A
     input:
         samples=config["samples"],
     output:
-        emp_noise_estimates="results/TF_estimates_analysis/plots/emp_noise_estimates.png",
+        emp_noise_estimates=f"{pref}/TF_estimates_analysis/plots/{cohort}/emp_noise_estimates.png",
     resources:
         mem_mb=1000,
         runtime=lambda wildcards, attempt: attempt * 180,

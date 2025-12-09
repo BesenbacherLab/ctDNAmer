@@ -4,8 +4,8 @@ rule count_cfdna_kmers:
     output:
         kmers="results/patients/{pt}/{cfDNA_ID}/kmers.kmc_pre",
     resources:
-        mem_mb=300000,
-        runtime=lambda wildcards, attempt: attempt * 1880,
+        mem_mb=200000,
+        runtime=lambda wildcards, attempt: attempt * 720,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/count_kmers.out"
     params:
@@ -16,8 +16,20 @@ rule count_cfdna_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        'kmc -k{params.k} -m300 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} {params.o_suf_rm} {params.tmpdir} 2> {log}'
-
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+        scratch_kmctmp=/scratch/$SLURM_JOBID/temp_kmc/
+    
+        mkdir ${{scratch_kmctmp}}
+    
+        kmc -k{params.k} -m200 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} ${{scratch_kmers}} ${{scratch_kmctmp}} 2> {log} 
+        
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        rm -r ${{scratch_kmctmp}}
+        '''
 
 rule intersect_cfDNA_and_iGL_kmers:
     input:
@@ -28,7 +40,7 @@ rule intersect_cfDNA_and_iGL_kmers:
         int_sec_suf=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.kmc_suf"),
     resources:
         mem_mb=20000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 720,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/intersect_cfDNA_and_iGL_kmers.out"
     params:
@@ -38,8 +50,16 @@ rule intersect_cfDNA_and_iGL_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools -t{threads} -v simple {params.i1_suf_rm} -ci1 -cx1000000000 {params.i2_suf_rm} -ci1 -cx1000000000 intersect {params.o_suf_rm} -ci1 -cs1000000000 -cx1000000000 -ocleft 2> {log}"
-
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+    
+        kmc_tools -t{threads} -v simple {params.i1_suf_rm} -ci1 -cx1000000000 {params.i2_suf_rm} -ci1 -cx1000000000 intersect ${{scratch_kmers}} -ci1 -cs1000000000 -cx1000000000 -ocleft 2> {log}
+        
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        '''
 
 rule make_cfDNA_iGL_intersection_count_summary:
     input:
@@ -57,8 +77,15 @@ rule make_cfDNA_iGL_intersection_count_summary:
     conda:
         "../envs/kmc3_2.yaml"
     shell: 
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
 
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram ${{scratch_kmers}} -ci1 -cx1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.c_sum}
+        '''
 
 rule filter_cfDNA_iGL_intersection_count_summary:
     input:
@@ -112,8 +139,15 @@ rule dump_cfDNA_iGL_intersection:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump {output.dump} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
 
+        kmc_tools transform {params.i_suf_rm} -ci{params.c_lower} -cx{params.c_higher} dump ${{scratch_kmers}} -ci{params.c_lower} -cx{params.c_higher} -cs1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.dump}
+        '''
 
 rule create_cfDNA_indGL_intersection_GC_content_count_tables:
     input:

@@ -15,3 +15,4 @@ ctDNA_mers_dir: "./"
 subfd: "tf_estimation/" # tf_estimation/ is the default output subfolder in ctDNAmers
 clonalSNVs_dir: "../clonal_SNVs/"
 count_filter_test_results_dir: "./"
+count_filter_test_plot: False

@@ -6,8 +6,8 @@ rule plot_cfDNA_mean_and_cov_comparison: # SF7
         units=config["samples_cfDNA"],
         wgs_cov=config["wgs_coverage_mean_and_sd"],
     output:
-        cfDNA_mean_vs_cov="results/TF_estimates_analysis/plots/cfDNA_kmer_mean_vs_seq_cov_mean.png",
-        cfDNA_sd_vs_cov="results/TF_estimates_analysis/plots/cfDNA_kmer_sd_vs_seq_cov_sd.png",
+        cfDNA_mean_vs_cov=f"{pref}/TF_estimates_analysis/plots/{cohort}/cfDNA_kmer_mean_vs_seq_cov_mean.png",
+        cfDNA_sd_vs_cov=f"{pref}/TF_estimates_analysis/plots/{cohort}/cfDNA_kmer_sd_vs_seq_cov_sd.png",
     resources:
         mem_mb=1000,
         runtime=lambda wildcards, attempt: attempt * 180,

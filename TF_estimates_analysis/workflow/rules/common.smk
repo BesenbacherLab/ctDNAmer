@@ -11,3 +11,6 @@ min_version("8.0.0")
 ###### Config file and sample sheets #####
 configfile: "config/config_TF_estimates_analysis.yaml"
 #validate(config, schema="../schemas/config.schema.yaml")
+
+cohort = config["cohort"]
+pref = config["pref"]

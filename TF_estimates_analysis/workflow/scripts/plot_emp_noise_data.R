@@ -144,7 +144,7 @@ if (cohort %in% c("frfr", "ffpe")){
         mutate(label = paste0("cfDNA count: ", cfDNA, "; cor: ", round(cor, 3))) |>
         ungroup()
     
-    p <- ggplot(res %>% filter(cfDNA <= 4) |> filter(sample_type == "frfr")) + 
+    p <- ggplot(res %>% filter(cfDNA <= 4) |> filter(sample_type == cohort)) + 
         geom_point(aes(x = mean_n_donor, y = mean_n_cfDNA)) + 
         facet_wrap(~label, scales = "free", labeller=label_value, nrow = 1) + 
         geom_abline(linetype = 2) + 

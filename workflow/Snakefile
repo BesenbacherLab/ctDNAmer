@@ -4,23 +4,24 @@ include: "rules/common.smk"
 OUTPUT_C = []
 
 # Germline union (GLU) output
-GLU_KMERS_SUMMARIES = expand(
-    "results/germline_union/{glu_type}/{glu_sample}/kmers_count_sum_0rm.txt", zip, 
-    glu_type = samples_glu.data_type.tolist(), glu_sample = samples_glu.index.tolist()
-    )
-GLU_SUMMARIES = expand(
-    "results/germline_union/germline_union_{glu_samples_comb}_count_sum_0rm.txt", 
-    glu_samples_comb=glu_combinations[:-1]
-    )
-GLU_FINAL = expand(
-    "results/germline_union/final_germline_union_{glu_samples_comb_last}.kmc_pre", 
-    glu_samples_comb_last=glu_combinations[-1]
-    )
-GLU_FINAL_SUMMARY = expand(
-    "results/germline_union/final_germline_union_{glu_samples_comb_last}_count_sum_0rm.txt", 
-    glu_samples_comb_last=glu_combinations[-1]
-    )
-OUTPUT_C.extend(GLU_KMERS_SUMMARIES+GLU_SUMMARIES+GLU_FINAL+GLU_FINAL_SUMMARY) 
+if not glu_path:
+    GLU_KMERS_SUMMARIES = expand(
+        "results/germline_union/{glu_type}/{glu_sample}/kmers_count_sum_0rm.txt", zip, 
+        glu_type = samples_glu.data_type.tolist(), glu_sample = samples_glu.index.tolist()
+        )
+    GLU_SUMMARIES = expand(
+        "results/germline_union/germline_union_{glu_samples_comb}_count_sum_0rm.txt", 
+        glu_samples_comb=glu_combinations[:-1]
+        )
+    GLU_FINAL = expand(
+        "results/germline_union/final_germline_union_{glu_samples_comb_last}.kmc_pre", 
+        glu_samples_comb_last=glu_combinations[-1]
+        )
+    GLU_FINAL_SUMMARY = expand(
+        "results/germline_union/final_germline_union_{glu_samples_comb_last}_count_sum_0rm.txt", 
+        glu_samples_comb_last=glu_combinations[-1]
+        )
+    OUTPUT_C.extend(GLU_KMERS_SUMMARIES+GLU_SUMMARIES+GLU_FINAL+GLU_FINAL_SUMMARY) 
 
 # unique tumor output
 GL_SUMMARIES = expand(
@@ -39,7 +40,7 @@ UT_FILTERED_SORTED = expand(
     "results/patients/{pt}/unique_tumor/UT_filtered_sorted.txt",
     pt=samples.index.tolist()
     )
-OUTPUT_C.extend(GL_SUMMARIES+T_SUB_INDGL_SUMMARIES+UT_SUMMARIES+UT_FILTERED_SORTED)
+OUTPUT_C.extend(GL_SUMMARIES+UT_FILTERED_SORTED)
 
 # empirical noise output
 DONOR_MEAN = expand(
@@ -50,9 +51,17 @@ EMP_NOISE = expand(
     "results/patients/{pt}/empirical_noise/estimates.csv",
     pt=samples.index.tolist()
     )
-OUTPUT_C.extend(DONOR_MEAN+EMP_NOISE)
+NOISE_INTERSECTION = expand(
+    "results/patients/{pt}/empirical_noise/{donor}/combined_intersection.txt",
+    pt=samples.index.tolist(), donor=donors.index.tolist()
+    )
+OUTPUT_C.extend(DONOR_MEAN+EMP_NOISE+NOISE_INTERSECTION)
 
 # cfDNA output
+CFDNA_KMERS = expand(
+    "results/patients/{pt}/{cfDNA_ID}/kmers.kmc_pre", zip, 
+    pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()
+    )
 CFDNA_MEAN = expand(
     "results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean.csv", zip, 
     pt=units.sample_ID.tolist(), cfDNA_ID=units.index.tolist()

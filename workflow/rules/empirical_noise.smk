@@ -17,7 +17,20 @@ rule count_donor_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        'kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} {params.o_suf_rm} {params.tmpdir} 2> {log}'
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers
+        scratch_kmctmp=/scratch/$SLURM_JOBID/temp_kmc/
+    
+        mkdir ${{scratch_kmctmp}}
+
+        kmc -k{params.k} -m50 -t{threads} -ci1 -cs1000000000 -cx1000000000 -f{params.i_format} @{input.input_files} ${{scratch_kmers}} ${{scratch_kmctmp}} 2> {log}
+        
+        mv ${{scratch_kmers}}.kmc_pre {params.o_suf_rm}.kmc_pre
+        mv ${{scratch_kmers}}.kmc_suf {params.o_suf_rm}.kmc_suf
+        rm -r ${{scratch_kmctmp}}
+        '''
 
 
 rule make_count_summary_donors:
@@ -35,7 +48,15 @@ rule make_count_summary_donors:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram {output.c_sum} -ci1 -cx1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
+
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 histogram ${{scratch_kmers}} -ci1 -cx1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.c_sum}
+        '''
 
 
 rule filter_count_summary_donors:
@@ -95,7 +116,20 @@ rule intersect_UT_and_donor_kmers:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools -t{threads} -v simple {params.i_UT_suf_rm} -ci1 -cx100000 {params.i_donor_suf_rm} -ci1 -cx1000000000 intersect {params.o_suf_rm_UT_c} -ci1 -cs1000000000 -cx1000000000 -ocleft intersect {params.o_suf_rm_donor_c} -ci1 -cs1000000000 -cx1000000000 -ocright 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers_UT_c=/scratch/$SLURM_JOBID/kmers_UT_c
+        scratch_kmers_donor_c=/scratch/$SLURM_JOBID/kmers_donor_c
+
+        kmc_tools -t{threads} -v simple {params.i_UT_suf_rm} -ci1 -cx100000 {params.i_donor_suf_rm} -ci1 -cx1000000000 intersect ${{scratch_kmers_UT_c}} -ci1 -cs1000000000 -cx1000000000 -ocleft intersect ${{scratch_kmers_donor_c}} -ci1 -cs1000000000 -cx1000000000 -ocright 2> {log}
+        
+        mv ${{scratch_kmers_UT_c}}.kmc_pre {params.o_suf_rm_UT_c}.kmc_pre
+        mv ${{scratch_kmers_UT_c}}.kmc_suf {params.o_suf_rm_UT_c}.kmc_suf
+
+        mv ${{scratch_kmers_donor_c}}.kmc_pre {params.o_suf_rm_donor_c}.kmc_pre
+        mv ${{scratch_kmers_donor_c}}.kmc_suf {params.o_suf_rm_donor_c}.kmc_suf
+        '''
 
 
 rule dump_intersection_UT_counts:
@@ -114,8 +148,15 @@ rule dump_intersection_UT_counts:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 dump {output.dump} -ci1 -cx1000000000 -cs1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
 
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 dump ${{scratch_kmers}} -ci1 -cx1000000000 -cs1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.dump}
+        '''
 
 rule dump_intersection_donor_counts:
     input:
@@ -133,15 +174,22 @@ rule dump_intersection_donor_counts:
     conda:
         "../envs/kmc3_2.yaml"
     shell:
-        "kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 dump {output.dump} -ci1 -cx1000000000 -cs1000000000 2> {log}"
+        '''
+        set -e
+        tmp_dir=$(mktemp -d --tmpdir=/scratch/$SLURM_JOBID)
+        scratch_kmers=/scratch/$SLURM_JOBID/kmers.txt
 
+        kmc_tools transform {params.i_suf_rm} -ci1 -cx1000000000 dump ${{scratch_kmers}} -ci1 -cx1000000000 -cs1000000000 2> {log}
+        
+        mv ${{scratch_kmers}} {output.dump}
+        '''
 
 rule combine_intersection_counts:
     input:
         UT_counts="results/patients/{pt}/empirical_noise/{donor}/UT_counts.txt",
         donor_counts="results/patients/{pt}/empirical_noise/{donor}/donor_counts.txt",
     output:
-        combined=temp("results/patients/{pt}/empirical_noise/{donor}/combined_intersection.txt"),
+        combined="results/patients/{pt}/empirical_noise/{donor}/combined_intersection.txt",
     resources:
         mem_mb=1000,
         runtime=lambda wildcards, attempt: attempt * 180,

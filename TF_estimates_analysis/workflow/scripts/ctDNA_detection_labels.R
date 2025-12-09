@@ -18,7 +18,7 @@ label_neg = 'neg., TF > 0.001'
 
 
 
-d_obs <- d |>  filter(ctDNA_status != "unknown") |>  filter(!is.na(TF)) |> arrange(TF)
+d_obs <- d |> filter(ctDNA_status != "unknown") |>  filter(!is.na(TF)) |> arrange(TF)
 # maximize Youden's J
 opt_cut <- cutpointr(data = d_obs, 
                      x = TF, 

@@ -1,0 +1,48 @@
+
+include: "rules/common.smk"
+OUTPUT = []
+
+BAM_BAI = expand(
+    "results/UT_kmers_mapping/patients/{pt}/UT_filtered.sorted.bam.bai",
+    pt=samples.sample_ID.tolist()
+    )
+#OUTPUT.append(BAM_BAI)
+
+ALIGNMENT_SUMMARY = expand(
+    "results/UT_kmers_mapping/patients/{pt}/UT_filtered_alignment_sum.tsv",
+    pt=samples.sample_ID.tolist()
+    )
+OUTPUT.append(ALIGNMENT_SUMMARY)
+
+MAPPED_UT_MORE_UNIQUE = expand(
+    "results/UT_kmers_mapping/patients/{pt}/UT_filtered_more_unique.txt",
+    pt=samples.sample_ID.tolist()
+    )
+OUTPUT.append(MAPPED_UT_MORE_UNIQUE)
+
+POSTOP_EST = expand(
+    
+    pt=samples.sample_ID.tolist()
+    )
+
+# modeling output 
+PREOP_TF = expand(
+    "results/UT_kmers_mapping/patients/{pt}" + f"/{UT_subset}/" + "{preop_cfDNA_ID}/tf_estimation/preop_tf_estimate.csv", zip, 
+    pt=preop_units.sample_ID.tolist(), preop_cfDNA_ID=preop_units.index.tolist()
+    )
+OUTPUT.append(PREOP_TF)
+
+POSTOP_TF = expand(
+    "results/UT_kmers_mapping/patients/{pt}" + f"/{UT_subset}/" + "{postop_cfDNA_ID}/tf_estimation/postop_tf_estimate.csv", zip,
+    pt=postop_units.sample_ID.tolist(), postop_cfDNA_ID=postop_units.index.tolist()
+    )
+OUTPUT.append(POSTOP_TF)
+
+
+rule all:
+    input: 
+        OUTPUT
+
+##### Modules #####
+include: "rules/align_UT.smk"
+include: "rules/TF_estimation_w_subset_of_UT.smk"
