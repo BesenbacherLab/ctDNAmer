@@ -9,7 +9,7 @@ ctDNAmer leverages genome-wide information and is not limited to SNVs. Probabili
 
 The method is built as a customizable [snakemake workflow](https://f1000research.com/articles/10-33) [1]. K-mer counting and k-mer set operations are done by [KMC3](https://academic.oup.com/bioinformatics/article/33/17/2759/3796399) [2], probablistic models are implemented in [STAN](https://mc-stan.org/) [3] and sampling is performed with the rstan package. 
 
-Detailed  descripton of ctDNAmer can be found [here](https://www.biorxiv.org/).
+Detailed  descripton of ctDNAmer can be found [here](https://www.biorxiv.org/content/10.1101/2025.07.23.666290v1).
 
 ## Requirements
 
