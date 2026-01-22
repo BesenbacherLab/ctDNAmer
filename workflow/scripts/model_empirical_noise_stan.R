@@ -43,7 +43,7 @@ for (donor in donor_list){
                          n_kmers = 1)
     }
     data_i_long <- rep(data_i$donor_count, data_i$n_kmers)
-    data_i_long <- c(data_i_long, rep(0, n_UT - sum(data_i$n_kmers)))
+    data_i_long <- c(data_i_long, rep(0, max(1, n_UT - sum(data_i$n_kmers))))
     
     f_data_i <- tibble(donor_mean = mean_i$mean[1], 
                        count = data_i_long)

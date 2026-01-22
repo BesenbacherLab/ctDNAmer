@@ -14,7 +14,11 @@ gc_data <- read.table(input_file, header = TRUE, sep = "\t")
 print("Head of data")
 print(head(gc_data, n = 2))
 
+
+
 for (gc in unique(gc_data$GC)){
+    min_btwn_peaks <- 2
+    mean_peak <- 1
     
     d = gc_data |> filter(GC == gc) |> select(count, n_kmers)
     d$n_kmers <- as.numeric(d$n_kmers)
@@ -24,6 +28,8 @@ for (gc in unique(gc_data$GC)){
     d_minimal <- d %>% filter(between(count, 1, max_cutoff))
     d_minimal$count <- as.numeric(d_minimal$count)
     min_btwn_peaks <- round(optimize(approxfun(d_minimal$count,d_minimal$n_kmers),interval=c(1,10))$minimum)
+    print("min_btwn_peaks")
+    print(min_btwn_peaks)
     # find the mode of the signal distribution (distribution with the higher mode) 
     d_minimal <- d_minimal %>% filter(count >= min_btwn_peaks)
     mean_peak <- d_minimal$count[which(d_minimal$n_kmers == max(d_minimal$n_kmers))]
@@ -32,7 +38,11 @@ for (gc in unique(gc_data$GC)){
     if (length(mean_peak) > 1){
         mean_peak <- mean_peak[1]
     }
-    
+    print("mean_peak")
+    print(mean_peak)
+    if (length(mean_peak) == 0){
+        mean_peak = 1
+    }
     # if difference between minimum position (count with smallest number of k-mers between the two distributions)
     # and mode of the signal distribution is smaller than 2:
     # it is likely that the current k-mer count distribution is a uniformly decreasing distribution and there is no second (higher) mode
