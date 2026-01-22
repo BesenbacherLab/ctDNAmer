@@ -4,6 +4,7 @@ sink(snakemake@log[[1]], append=TRUE) # logging
 library(tidyverse)
 
 res_dir <- snakemake@params[["res_dir"]]
+res_subfd <- snakemake@params[["res_subfd"]]
 cohort <- snakemake@params[["cohort"]]
 
 # input data
@@ -19,7 +20,7 @@ d[c("noise_mean_m30", "noise_var_m30")] <- NA
 for (row in 1:nrow(d)){
     pt <- d$sample_ID[row]
 
-    n_est <- read.table(paste0(res_dir, "results/patients/", pt, "/empirical_noise/estimates.csv"), sep = ",", header = TRUE)
+    n_est <- read.table(paste0(res_dir, pt, "/", res_subfd, "empirical_noise/estimates.csv"), sep = ",", header = TRUE)
     mean <- n_est$mean_mu[1]
     phi <- n_est$mean_phi[1]
 

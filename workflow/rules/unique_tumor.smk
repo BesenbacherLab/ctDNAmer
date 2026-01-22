@@ -5,7 +5,7 @@ rule count_germline_kmers:
         kmers="results/patients/{pt}/germline/kmers.kmc_pre",
     resources:
         mem_mb=50000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/germline/count_kmers.out"
     params:
@@ -39,7 +39,7 @@ rule make_germline_count_summary:
         c_sum=temp("results/patients/{pt}/germline/kmers_count_sum.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/germline/make_germline_count_summary.out"
     params:
@@ -66,7 +66,7 @@ rule filter_germline_count_summary:
         c_sum_filt="results/patients/{pt}/germline/kmers_count_sum_0rm.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/germline/filter_germline_count_summary.out"
     conda:
@@ -114,7 +114,7 @@ rule count_tumor_kmers:
         kmers="results/patients/{pt}/tumor/kmers.kmc_pre",
     resources:
         mem_mb=50000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/tumor/count_kmers.out"
     params:
@@ -148,7 +148,7 @@ rule make_tumor_count_summary:
         c_sum=temp("results/patients/{pt}/tumor/kmers_count_sum.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/tumor/make_tumor_count_summary.out"
     params:
@@ -174,7 +174,7 @@ rule filter_tumor_count_summary:
         c_sum_filt="results/patients/{pt}/tumor/kmers_count_sum_0rm.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/tumor/filter_tumor_count_summary.out"
     conda:
@@ -208,7 +208,7 @@ rule subtract_individual_germline_from_tumor:
         diff_suf=temp("results/patients/{pt}/unique_tumor/tumor_sub_indGL.kmc_suf"),
     resources:
         mem_mb=50000,
-        runtime=lambda wildcards, attempt: attempt * 720,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24,
     log:
         "logs/patients/{pt}/unique_tumor/subtract_indGL_from_tumor.out"
     params:
@@ -240,7 +240,7 @@ rule make_tumor_sub_indGL_count_summary:
         c_sum=temp("results/patients/{pt}/unique_tumor/tumor_sub_indGL_count_sum.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/tumor/make_tumor_sub_indGL_count_summary.out"
     params:
@@ -266,7 +266,7 @@ rule filter_tumor_sub_indGL_count_summary:
         c_sum_filt="results/patients/{pt}/unique_tumor/tumor_sub_indGL_count_sum_0rm.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/tumor/filter_tumor_sub_indGL_count_summary.out"
     conda:
@@ -285,7 +285,7 @@ rule subtract_germline_union_from_tumor:
         diff_suf="results/patients/{pt}/unique_tumor/UT.kmc_suf",
     resources:
         mem_mb=50000,
-        runtime=lambda wildcards, attempt: attempt * 720,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24,
     log:
         "logs/patients/{pt}/unique_tumor/subtract_glu_from_tumor.out"
     params:
@@ -317,7 +317,7 @@ rule make_tumor_sub_indGL_and_GLU_count_summary:
         c_sum=temp("results/patients/{pt}/unique_tumor/UT_count_sum.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/tumor/make_tumor_sub_indGL_and_GLU_count_summary.out"
     params:
@@ -343,7 +343,7 @@ rule filter_tumor_sub_indGL_and_GLU_count_summary:
         c_sum_filt="results/patients/{pt}/unique_tumor/UT_count_sum_0rm.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/tumor/filter_tumor_sub_indGL_and_GLU_count_summary.out"
     conda:
@@ -360,7 +360,7 @@ rule dump_ut_kmers:
         dump=temp("results/patients/{pt}/unique_tumor/UT.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/unique_tumor/dump_kmers.out"
     params:
@@ -391,7 +391,7 @@ rule filter_ut_kmers:
         UT_data_gc_table="results/patients/{pt}/unique_tumor/UT_gc_content_count_summary.txt",
     resources:
         mem_mb=75000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/unique_tumor/filter_ut_kmers.out"
     params:
@@ -412,7 +412,7 @@ rule sort_ut_kmers:
         UT_sorted="results/patients/{pt}/unique_tumor/UT_filtered_sorted.txt",
     resources:
         mem_mb=5000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/unique_tumor/sort_ut_kmers.out"
     conda:

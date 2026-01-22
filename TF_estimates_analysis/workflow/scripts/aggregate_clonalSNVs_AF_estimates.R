@@ -8,7 +8,6 @@ f <- snakemake@input[["units"]]
 d <- read.csv(f)
 
 cohort = snakemake@params[["cohort"]]
-subf = snakemake@params[["subfd"]]
 clonalSNVs_dir = snakemake@params[["clonalSNVs_dir"]]
 
 # filter for target cohort

@@ -1,3 +1,10 @@
+UT_kmers_mapping/workflow/scripts/models/empirical_noise.rds
+UT_kmers_mapping/workflow/scripts/models/tf_postop.rds
+UT_kmers_mapping/workflow/scripts/models/tf_preop.rds
+LOD_analysis/
+LOD_analysis/**
+UT_minimizers_test/**
+UT_minimizers_test/
 results/**
 resources/**
 logs/**

@@ -5,6 +5,7 @@ library(tidyverse)
 
 res_dir = snakemake@params[["res_dir"]]
 cohort = snakemake@params[["cohort"]]
+res_subfd = snakemake@params[["res_subfd"]]
 
 # read in data
 f <- snakemake@input[["samples"]]
@@ -29,7 +30,7 @@ d_cfDNA <- d_cfDNA |>
 # aggregate k-mer mean count estimates
 d_cfDNA[c("mean_count", "sd_count")] <- NA
 for (i in 1:nrow(d_cfDNA)){ 
-    dat <- read.table(paste0(res_dir, "results/patients/", d_cfDNA$sample_ID[i], "/", d_cfDNA$cfDNA_ID[i], "/cfDNA_iGL_int_cfDNAc_mean.csv"), sep = ",", header = TRUE)
+    dat <- read.table(paste0(res_dir, d_cfDNA$sample_ID[i], "/", d_cfDNA$cfDNA_ID[i], "/", res_subfd, "cfDNA_iGL_int_cfDNAc_mean.csv"), sep = ",", header = TRUE)
     d_cfDNA[i, c("mean_count", "sd_count")] = c(dat$mean[1], dat$sd[1])
 }
 

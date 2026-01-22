@@ -13,13 +13,15 @@ min_version("8.0.0")
 configfile: "config/config_UT_mapping_kmers.yaml"
 #validate(config, schema="../schemas/config.schema.yaml")
 
+UT_subset = config["UT_subset"]
+
 # patient data
 samples = pd.read_table(config["samples"]).set_index("sample_ID", drop=False)
 #validate(samples, schema="../schemas/samples.schema.yaml")
 
 # cfDNA data
 units = pd.read_table(config["samples_cfDNA"]).set_index("cfDNA_ID", drop=False)
-validate(units, schema="../schemas/units.schema.yaml")
+#validate(units, schema="../schemas/units.schema.yaml")
 
 preop_units = units.loc[units["timepoint"] <= 0, :].copy()
 preop_units["preop_tf_path"] = preop_units.apply(lambda row: f"results/UT_kmers_mapping/patients/{row.sample_ID}/{UT_subset}/{row.name}/tf_estimation/preop_tf_estimate.csv", axis = 1)
@@ -34,7 +36,11 @@ donors = pd.read_table(config["donors"]).set_index("donor_ID", drop=False)
 reference_name = config["reference"]["name"]
 reference_fasta = config["reference"]["fasta"]
 
-UT_subset = config["UT_subset"]
+def k():
+    """
+    K-mer length
+    """
+    return config["k"]
 
 def get_mutect_and_delly_input(wildcards):
     """

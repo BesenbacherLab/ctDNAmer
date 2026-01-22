@@ -5,7 +5,7 @@ rule count_cfdna_kmers:
         kmers="results/patients/{pt}/{cfDNA_ID}/kmers.kmc_pre",
     resources:
         mem_mb=200000,
-        runtime=lambda wildcards, attempt: attempt * 720,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/count_kmers.out"
     params:
@@ -39,8 +39,8 @@ rule intersect_cfDNA_and_iGL_kmers:
         int_sec=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.kmc_pre"),
         int_sec_suf=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.kmc_suf"),
     resources:
-        mem_mb=20000,
-        runtime=lambda wildcards, attempt: attempt * 720,
+        mem_mb=50000,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/intersect_cfDNA_and_iGL_kmers.out"
     params:
@@ -69,7 +69,7 @@ rule make_cfDNA_iGL_intersection_count_summary:
         c_sum=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_sum.txt"),
     resources:
         mem_mb=20000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/make_cfDNA_iGL_intersection_count_summary.out"
     params:
@@ -94,7 +94,7 @@ rule filter_cfDNA_iGL_intersection_count_summary:
         c_sum_filt="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_sum_0rm.txt",
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/make_cfDNA_iGL_intersection_count_summary.out"
     conda:
@@ -110,7 +110,7 @@ rule calculate_cfDNA_iGL_intersection_mean:
         mean_count="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean.csv",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/calculate_cfDNA_iGL_intersection_mean.out"
     params:
@@ -129,7 +129,7 @@ rule dump_cfDNA_iGL_intersection:
         dump=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/dump_cfDNA_iGL_intersection.out"
     params:
@@ -156,7 +156,7 @@ rule create_cfDNA_indGL_intersection_GC_content_count_tables:
         count_table="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_gc_content_counts.txt",
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 1440,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/create_cfDNA_indGL_intersection_GC_content_count_tables.out"
     params:
@@ -175,7 +175,7 @@ rule calculate_cfDNA_iGL_intersection_mean_gc_strat:
         cfDNA_mean_gc_strat="results/patients/{pt}/{cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv",
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/calculate_cfDNA_iGL_intersection_mean_gc_strat.out"
     params:

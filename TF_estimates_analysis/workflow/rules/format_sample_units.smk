@@ -32,7 +32,8 @@ rule aggregate_ctDNAmers_TF_estimates:
         "logs/TF_estimates_analysis/aggregate_ctDNAmers_TF_estimates.out"
     params: 
         cohort = config["cohort"],
-        subfd = config["subfd"],
+        TF_subfd = config["TF_subfd"],
+        res_subfd = config["res_subfd"],
         ctDNA_mers_dir = config["ctDNA_mers_dir"],
     conda:
         "../envs/R4_1.yaml"

@@ -33,9 +33,9 @@ for (row in 1:nrow(d_cfDNA)){
     pt_label <- d_cfDNA$pt_label[row]
 
     if (sample_type == "ctDNA-positive"){
-        f <- paste0(res_dir, "results/patients/", pt, "/", fd, "/unique_tumor_count_filter_test/tf_estimation/preop_combined_tf_estimates.csv")
+        f <- paste0(res_dir, pt, "/", fd, "/unique_tumor_count_filter_test/tf_estimation/preop_combined_tf_estimates.csv")
     } else {
-        f <- paste0(res_dir, "results/patients/", pt, "/", fd, "/unique_tumor_count_filter_test/tf_estimation/postop_combined_tf_estimates.csv")
+        f <- paste0(res_dir, pt, "/", fd, "/unique_tumor_count_filter_test/tf_estimation/postop_combined_tf_estimates.csv")
     }
     
     res_fd <- read.csv(f, header = TRUE)

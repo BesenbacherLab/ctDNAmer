@@ -9,7 +9,8 @@ f <- snakemake@input[["units"]]
 d <- read.csv(f)
 
 cohort = snakemake@params[["cohort"]]
-subf = snakemake@params[["subfd"]]
+TF_subf = snakemake@params[["TF_subfd"]]
+res_subf = snakemake@params[["res_subfd"]]
 ctDNA_mers_dir = snakemake@params[["ctDNA_mers_dir"]]
 
 preop_wn <- NULL
@@ -18,7 +19,7 @@ for (row in 1:nrow(d_BL)){
     pt = d_BL[row, "sample_ID"]
     fd = d_BL[row, "cfDNA_ID"]
     
-    est3 <- read.csv(paste0(ctDNA_mers_dir, "results/patients/", pt, "/", fd, "/", subf, "preop_tf_estimate.csv"))
+    est3 <- read.csv(paste0(ctDNA_mers_dir, pt, "/", res_subf, fd, "/", TF_subf, "preop_tf_estimate.csv"))
     preop_wn <- rbind(preop_wn, tibble(sample_ID = pt, 
                                        wgl = est3$wgl_mean, 
                                        glphi = est3$glphi_mean))
@@ -34,11 +35,11 @@ for (row in 1:nrow(d)){
     timepoint = d[row, "timepoint"][1]
     preop_wn_pt <- preop_wn |> filter(sample_ID == pt)
 
-    cfDNA_mean <- read.csv(paste0(ctDNA_mers_dir, "results/patients/", pt, "/", fd, "/cfDNA_iGL_int_cfDNAc_mean.csv"), header = TRUE)
+    cfDNA_mean <- read.csv(paste0("./results/patients/", pt, "/", fd, "/cfDNA_iGL_int_cfDNAc_mean.csv"), header = TRUE)
     d[row, "cfDNA_mean"] = cfDNA_mean$mean[1]
 
     f_est <- ifelse(timepoint <= 0, "preop_tf_estimate.csv", "postop_tf_estimate.csv")
-    est3 <- read.csv(paste0(ctDNA_mers_dir, "results/patients/", pt, "/", fd, "/", subf, f_est))
+    est3 <- read.csv(paste0(ctDNA_mers_dir, pt, "/", res_subf, fd, "/", TF_subf, f_est))
 
     d[row, c("TF", "TF_uCI", "TF_lCI")] = c(est3$tf_mean, est3$tf_upper_CI, est3$tf_lower_CI)
     d[row, c("wgl", "glphi")] = c(preop_wn_pt$wgl, preop_wn_pt$glphi)

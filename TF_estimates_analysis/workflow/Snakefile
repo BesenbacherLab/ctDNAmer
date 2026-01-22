@@ -5,42 +5,42 @@ OUTPUT = []
 
 # ctDNAmers results aggregation
 CTDNAMERS_TF=[
-    f"results/TF_estimates_analysis/ctDNAmers_TF/{cohort}/units_ctDNAmersTF.csv",
-    f"results/TF_estimates_analysis/ctDNAmers_TF/{cohort}/units_ctDNAmersTF_ctDNA_det.csv"]
+    f"{pref}/TF_estimates_analysis/ctDNAmers_TF/{cohort}/units_ctDNAmersTF.csv",
+    f"{pref}/TF_estimates_analysis/ctDNAmers_TF/{cohort}/units_ctDNAmersTF_ctDNA_det.csv"]
 OUTPUT.extend(CTDNAMERS_TF) 
 
 # clonal SNVs results aggregation
 if cohort == "frfr":
-    SNVS_TF=["results/TF_estimates_analysis/clonal_SNVs/units_clonalSNVsmeanAF.csv",
-        "results/TF_estimates_analysis/clonal_SNVs/units_clonal_SNVs_ctDNA_det.csv"
+    SNVS_TF=[f"{pref}/TF_estimates_analysis/clonal_SNVs/units_clonalSNVsmeanAF.csv",
+        f"{pref}/TF_estimates_analysis/clonal_SNVs/units_clonal_SNVs_ctDNA_det.csv"
         ]
     OUTPUT.extend(SNVS_TF) 
 
 if config["count_filter_test_plot"]:
     # count filter test results analysis
-    OUTPUT.append("results/TF_estimates_analysis/plots/count_filter_test_TF_estimates.png") 
-
+    OUTPUT.append(f"{pref}/TF_estimates_analysis/plots/count_filter_test_TF_estimates.png") 
 
 # cfDNA kmers mean counts vs WGS sequencing coverage
-OUTPUT.append(f"results/TF_estimates_analysis/plots/{cohort}/cfDNA_kmer_mean_vs_seq_cov_mean.png") 
+if cfDNA_mean_plot: 
+    OUTPUT.append(f"{pref}/TF_estimates_analysis/plots/{cohort}/cfDNA_kmer_mean_vs_seq_cov_mean.png") 
 
 # empirical noise
 EMP_NOISE=[
-    f"results/TF_estimates_analysis/plots/{cohort}/emp_noise_data.png",
-    f"results/TF_estimates_analysis/plots/{cohort}/emp_noise_estimates.png"
+    f"{pref}/TF_estimates_analysis/plots/{cohort}/emp_noise_data.png",
+    f"{pref}/TF_estimates_analysis/plots/{cohort}/emp_noise_estimates.png"
     ]
 OUTPUT.extend(EMP_NOISE)
 
 # ctDNAmers TF estimates summary and lead time
-TF_SUM=[f"results/TF_estimates_analysis/plots/{cohort}/ctDNAmers_TF_estimates_summary.png",
-    f"results/TF_estimates_analysis/plots/{cohort}/ctDNAmers_lead_time.png"
+TF_SUM=[f"{pref}/TF_estimates_analysis/plots/{cohort}/ctDNAmers_TF_estimates_summary.png",
+    f"{pref}/TF_estimates_analysis/plots/{cohort}/ctDNAmers_lead_time.png"
     ]
 OUTPUT.extend(TF_SUM)
 
 if cohort == "frfr":
     # comp to clonal SNVs mean allele frequency
-    OUTPUT.append("results/TF_estimates_analysis/plots/clonalSNVs_ctDNAmers_recur_pt_timelines.png")
-    OUTPUT.append("results/TF_estimates_analysis/plots/clonalSNVs_ctDNAmers_ROC.png")
+    OUTPUT.append(f"{pref}/TF_estimates_analysis/plots/clonalSNVs_ctDNAmers_recur_pt_timelines.png")
+    OUTPUT.append(f"{pref}/TF_estimates_analysis/plots/clonalSNVs_ctDNAmers_ROC.png")
 
 
 ##### Target rules #####

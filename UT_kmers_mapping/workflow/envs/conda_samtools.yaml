@@ -1,0 +1,9 @@
+name: conda_samtools
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - pysam=0.20.0
+  - python=3.7.12
+  - samtools=1.16.1
+prefix: /home/coroperv/miniconda3/envs/conda_samtools

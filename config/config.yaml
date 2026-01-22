@@ -6,7 +6,7 @@ donors: config/donors.tsv
 k: 51
 gc_lower: 20
 gc_upper: 80
-tumor_fileformat: "FASTQ"
+tumor_fileformat: "BAM"
 min_UT_set_size: 20000
 count_LB: 3
 count_UB: 100

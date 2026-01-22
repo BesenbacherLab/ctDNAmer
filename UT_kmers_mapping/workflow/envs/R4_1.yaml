@@ -1,0 +1,14 @@
+name: rstan
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.4.3=hc038350_5
+  - r-bh=1.87.0_1=r44hc72bb7e_1
+  - r-coda=0.19_4.1=r44hc72bb7e_2
+  - r-codetools=0.2_20=r44hc72bb7e_2
+  - r-rcpp=1.1.0=r44h93ab643_0
+  - r-rcppparallel=5.1.9=r44h93ab643_1
+  - r-rstan=2.32.7=r44h3697838_0
+  - r-tidyverse=2.0.0=r44h785f33e_3
+prefix: /home/coroperv/miniconda3/envs/rstan

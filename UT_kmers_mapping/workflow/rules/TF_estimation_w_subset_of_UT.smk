@@ -4,7 +4,7 @@
 
 rule sort_ut_kmers:
     input:
-        UT_kmers="results/UT_kmers_mapping/patients/{pt}/UT_filtered_more_unique.txt",
+        UT_kmers="results/UT_kmers_mapping/patients/{pt}/UT_filtered_1mm.txt",
     output:
         UT_sorted=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/UT_filtered_sorted.txt",
     resources:
@@ -39,7 +39,7 @@ rule filter_intersection_counts:
 
 rule create_intersection_tables:
     input:
-        filtered_intersection=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/empirical_noise/{{donor}}/combined_intersection_filtered.txt",
+        kmers=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/empirical_noise/{{donor}}/combined_intersection_filtered.txt",
     output:
         count_table=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/empirical_noise/{{donor}}/combined_int_gc_content_count_table.txt",
     resources:
@@ -58,7 +58,7 @@ rule create_intersection_tables:
 rule model_empirical_noise:
     input:
         UT_mdata="results/patients/{pt}/unique_tumor/UT_n_and_ci.txt",
-        noise_count_tables=expand("results/UT_kmers_mapping/patients/{pt}/" + f"{UT_subset}/empirical_noise/" + "{donor}/combined_int_gc_content_count_table.txt", donor=donors.index.tolist()),
+        noise_count_tables=expand("results/UT_kmers_mapping/patients/{{pt}}/" + f"{UT_subset}/empirical_noise/" + "{donor}/combined_int_gc_content_count_table.txt", donor=donors.index.tolist()),
         donor_means=expand("results/donors/{donor}/mean_count.csv", donor=donors.index.tolist()),
         model=os.path.join(workflow.basedir, "scripts/models/empirical_noise.stan"),
     output:
@@ -108,7 +108,7 @@ rule filter_combined_ut_cfDNA:
 
 rule model_tf_preop_cfDNA:
     input:
-        kmer_data=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/{{cfDNA_ID}}/UT_cfDNA_annotation.txt",
+        kmer_data=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/{{preop_cfDNA_ID}}/UT_cfDNA_annotation.txt",
         cfDNA_mean_gc="results/patients/{pt}/{preop_cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv",
         noise_rate=lambda wildcards: str("results/UT_kmers_mapping/patients/" + str(wildcards.pt) + f"/{UT_subset}/empirical_noise/estimates.csv"),
         mod=os.path.join(workflow.basedir, "scripts/models/tf_preop.stan"),
@@ -140,7 +140,7 @@ rule model_tf_preop_cfDNA:
 
 rule model_tf_postop_cfDNA:
     input:
-        kmer_data=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/{{cfDNA_ID}}/UT_cfDNA_annotation.txt",
+        kmer_data=f"results/UT_kmers_mapping/patients/{{pt}}/{UT_subset}/{{postop_cfDNA_ID}}/UT_cfDNA_annotation.txt",
         cfDNA_mean_gc="results/patients/{pt}/{postop_cfDNA_ID}/cfDNA_iGL_int_cfDNAc_mean_gc_strat.csv",
         noise_rate=lambda wildcards: str("results/UT_kmers_mapping/patients/" + str(wildcards.pt) + f"/{UT_subset}/empirical_noise/estimates.csv"),
         preop_est= aggregate_preop_estimates,

@@ -4,6 +4,7 @@ sink(snakemake@log[[1]], append=TRUE) # logging
 library(tidyverse)
 
 res_dir <- snakemake@params[["res_dir"]]
+res_subfd <- snakemake@params[["res_subfd"]]
 cohort <- snakemake@params[["cohort"]]
 
 # input data
@@ -53,7 +54,7 @@ for (i in 1:nrow(d_cfDNA_nr)){ #
     s_type_i = d_cfDNA_nr$sample_type[i]
     n_s <- nrow(d_cfDNA_nr |> filter(sample_ID == pt))
     
-    kmer_data <- read.table(paste0(res_dir, "results/patients/", pt, "/", fd, "/UT_cfDNA_annotation.txt"), header = FALSE)
+    kmer_data <- read.table(paste0(res_dir, pt, "/", res_subfd, fd, "/UT_cfDNA_annotation.txt"), header = FALSE)
     colnames(kmer_data) <- c("kmer", "tumor", "gc", "cfDNA")
     kmer_data <- kmer_data |>
         filter(cfDNA > 0, cfDNA <= 100) |>
@@ -82,15 +83,18 @@ res_signal <- left_join(res_signal, res_signal_sum, by = c("pt", "cfDNA", "sampl
 # calculate mean number of observed UT k-mers in healthy donors
 res_noise <- NULL
 for (pt in unique(d_cfDNA_nr$sample_ID)){
-    UT_mdata <- read.table(paste0(res_dir, "results/patients/", pt, "/unique_tumor/UT_n_and_ci.txt"), header = TRUE)
-    min_Tcount <- UT_mdata$final_lower_cutoff[1]
-    max_Tcount <- UT_mdata$final_upper_cutoff[1]
+    d_cfDNA_nr_pt = d_cfDNA_nr |> filter(sample_ID == pt)
+    fd = d_cfDNA_nr_pt$cfDNA_ID[1]
+    kmer_data <- read.table(paste0(res_dir, pt, "/", res_subfd, fd, "/UT_cfDNA_annotation.txt"), header = FALSE)
+    colnames(kmer_data) <- c("kmer", "tumor", "gc", "cfDNA")
+    min_Tcount <- min(kmer_data$tumor)
+    max_Tcount <- max(kmer_data$tumor)
     s_type_i <- d_cfDNA_nr$sample_type[which(d_cfDNA_nr$sample_ID == pt)][1]
 
     res_pt <- NULL
     for (donor in d_donor$donor_ID){
         
-        f <- paste0(res_dir, "results/patients/", pt, "/empirical_noise/", donor, "/combined_int_gc_content_count_table.txt")
+        f <- paste0(res_dir, pt, "/", res_subfd, "empirical_noise/", donor, "/combined_int_gc_content_count_table.txt")
         d_pt <- read.table(f, header = TRUE)
         colnames(d_pt) <- c("GC", "UT_count", "cfDNA", "n_kmers")
         d_pt <- d_pt |> 

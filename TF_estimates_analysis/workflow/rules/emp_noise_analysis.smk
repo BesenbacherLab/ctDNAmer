@@ -16,6 +16,7 @@ rule plot_emp_noise_data: # SF1, SF4B
     params: 
         res_dir=config["ctDNA_mers_dir"],
         cohort=config["cohort"],
+        res_subfd=config["res_subfd"],
     conda:
         "../envs/R4_1.yaml"
     script:
@@ -35,6 +36,7 @@ rule plot_emp_noise_estimates: # SF2, SF4A
     params: 
         res_dir=config["ctDNA_mers_dir"],
         cohort=config["cohort"],
+        res_subfd=config["res_subfd"],
     conda:
         "../envs/R4_1.yaml"
     script:

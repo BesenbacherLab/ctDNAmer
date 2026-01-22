@@ -10,7 +10,7 @@ rule create_fasta_of_unique_tumor_kmers:
     log:
         "logs/UT_kmers_mapping/{pt}/create_fasta_of_unique_tumor_kmers.out",
     conda: 
-        "../envs/py3_12.yml"
+        "../envs/py3_12.yaml"
     script:
         "../scripts/fasta_from_txt.py"
 
@@ -26,7 +26,7 @@ rule map_unique_tumor_kmers_to_reference:
     log:
         "logs/UT_kmers_mapping/{pt}/map_unique_tumor_kmers_to_reference.out",
     conda: 
-        "../envs/bwa.yml"
+        "../envs/bwa.yaml"
     shell:
         "bwa mem {input.reference} {input.fasta} > {output.sam}"
 
@@ -41,7 +41,7 @@ rule create_bam_of_unique_tumor_kmers:
     log:
         "logs/UT_kmers_mapping/{pt}/create_bam_of_unique_tumor_kmers.out",
     conda: 
-        "../envs/conda_samtools.yml"
+        "../envs/conda_samtools.yaml"
     shell:
         "samtools view -S -b {input.sam} > {output.bam}"
 
@@ -56,7 +56,7 @@ rule sort_bam_of_unique_tumor_kmers:
     log:
         "logs/UT_kmers_mapping/{pt}/sort_bam_of_unique_tumor_kmers.out",
     conda: 
-        "../envs/conda_samtools.yml"
+        "../envs/conda_samtools.yaml"
     shell:
         "samtools sort {input.bam} -o {output.sorted}"
     
@@ -71,7 +71,7 @@ rule index_bam_of_unique_tumor_kmers:
     log:
         "logs/UT_kmers_mapping/{pt}/index_bam_of_unique_tumor_kmers.out",
     conda: 
-        "../envs/conda_samtools.yml"
+        "../envs/conda_samtools.yaml"
     shell:
         "samtools index {input.bam}"
 
@@ -89,7 +89,7 @@ rule analyse_mapping_char_and_overlap_w_mutect:
     log:
         "logs/UT_kmers_mapping/{pt}/analyse_mapping_char_and_overlap_w_mutect.out",
     conda: 
-        "../envs/py3_12.yml"
+        "../envs/py3_12.yaml"
     script:
         "../scripts/analyse_mapping_characteristics.py"
 

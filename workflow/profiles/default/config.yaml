@@ -4,8 +4,8 @@ __definitions__:
     - account = os.environ['ACCOUNT_NAME']
 executor: slurm
 latency-wait: 60
-max-jobs-per-second: 400
-jobs: 400
+max-jobs-per-second: 60
+jobs: 60
 keep-going: True
 rerun-incomplete: True
 printshellcmds: True

@@ -8,7 +8,7 @@ rule intersect_cfDNA_UT:
         int_sec_suf=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_UT_UTci2_intersection.kmc_suf"),
     resources:
         mem_mb=20000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/intersect_cfDNA_UT_ci2.out"
     params:
@@ -40,7 +40,7 @@ rule dump_cfDNA_UT_intersection:
         dump=temp("results/patients/{pt}/{cfDNA_ID}/cfDNA_UT_UTci2_intersection.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/dump_cfDNA_and_UT_UTci2_intersection.out"
     params:
@@ -67,7 +67,7 @@ rule annotate_UT_set_with_cfDNA_counts:
         combined="results/patients/{pt}/{cfDNA_ID}/UT_cfDNA_annotation.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     log:
         "logs/patients/{pt}/{cfDNA_ID}/annotate_UT_set_with_cfDNA_counts.out"
     conda:

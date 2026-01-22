@@ -6,7 +6,7 @@ rule count_donor_kmers:
         kmers="results/donors/{donor}/kmers.kmc_pre",
     resources:
         mem_mb=50000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/donors/{donor}/count_kmers.out"
     params:
@@ -40,7 +40,7 @@ rule make_count_summary_donors:
         c_sum=temp("results/donors/{donor}/kmers_count_sum.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/donors/{donor}/make_count_summary_donors.out"
     params:
@@ -66,7 +66,7 @@ rule filter_count_summary_donors:
         c_sum_filt="results/donors/{donor}/kmers_count_sum_0rm.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/donors/{donor}/filter_count_summary_donors.out"
     conda:
@@ -82,7 +82,7 @@ rule calculate_donor_mean_count:
         mean_count="results/donors/{donor}/mean_count.csv",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 3,
     log:
         "logs/donors/{donor}/calculate_donor_mean_count.out"
     params:
@@ -105,7 +105,7 @@ rule intersect_UT_and_donor_kmers:
         int_donor_c_suf=temp("results/patients/{pt}/empirical_noise/{donor}/donor_counts.kmc_suf"),
     resources:
         mem_mb=20000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24,
     log:
         "logs/patients/{pt}/empirical_noise/intersect_UT_and_{donor}_donor_kmers.out"
     params:
@@ -140,7 +140,7 @@ rule dump_intersection_UT_counts:
         dump=temp("results/patients/{pt}/empirical_noise/{donor}/UT_counts.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/empirical_noise/dump_{donor}_intersection_UT_counts_.out"
     params:
@@ -166,7 +166,7 @@ rule dump_intersection_donor_counts:
         dump=temp("results/patients/{pt}/empirical_noise/{donor}/donor_counts.txt"),
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/empirical_noise/dump_{donor}_intersection_donor_counts.out"
     params:
@@ -192,7 +192,7 @@ rule combine_intersection_counts:
         combined="results/patients/{pt}/empirical_noise/{donor}/combined_intersection.txt",
     resources:
         mem_mb=1000,
-        runtime=lambda wildcards, attempt: attempt * 180,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/empirical_noise/combine_intersection_counts_{donor}.out"
     conda:
@@ -208,7 +208,7 @@ rule create_intersection_tables:
         count_table="results/patients/{pt}/empirical_noise/{donor}/combined_int_gc_content_count_table.txt",
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 12,
     log:
         "logs/patients/{pt}/empirical_noise/create_intersection_table_{donor}.out"
     params:
@@ -234,7 +234,7 @@ rule model_empirical_noise:
         param_density="results/patients/{pt}/empirical_noise/param_density.png",
     resources:
         mem_mb=10000,
-        runtime=lambda wildcards, attempt: attempt * 360,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6,
     threads: 4
     log:
         "logs/patients/{pt}/empirical_noise/model_empirical_noise.out"

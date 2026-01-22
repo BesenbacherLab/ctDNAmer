@@ -1,5 +1,2 @@
 sample_ID	tumor	germline
-pt1	/home/user/patients/pt1/tumor/pt1_L6_1.fq.gz,/home/user/patients/pt1/tumor/pt1_L6_2.fq.gz	/home/user/patients/pt1/buffycoat/pt1_L6_1.fq.gz,/home/user/patients/pt1/buffycoat/pt1_L6_2.fq.gz
-pt2	/home/user/patients/pt2/tumor/pt2_L6_1.fq.gz,/home/user/patients/pt2/tumor/pt2_L6_2.fq.gz	/home/user/patients/pt2/buffycoat/pt2_L6_1.fq.gz,/home/user/patients/pt2/buffycoat/pt2_L6_2.fq.gz
-pt3	/home/user/patients/pt3/tumor/pt3_L6_1.fq.gz,/home/user/patients/pt3/tumor/pt3_L6_2.fq.gz	/home/user/patients/pt3/buffycoat/pt3_L6_1.fq.gz,/home/user/patients/pt3/buffycoat/pt3_L6_2.fq.gz
-pt4	/home/user/patients/pt4/tumor/pt4_L6_1.fq.gz,/home/user/patients/pt4/tumor/pt4_L6_2.fq.gz	/home/user/patients/pt4/buffycoat/pt4_L6_1.fq.gz,/home/user/patients/pt4/buffycoat/pt4_L6_2.fq.gz
+pt1	test_data/HG008-T_Illumina_195x_GRCh38-GIABv3_chr22_ds.bam	test_data/HG008-N-D_Illumina_169x_GRCh38-GIABv3_chr22_ds.bam
