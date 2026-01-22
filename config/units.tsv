@@ -1,2 +1,2 @@
 sample_ID	cfDNA_ID	cfDNA	timepoint
-pt1	cfDNA1	test_data/HG008-T_N-D_merged_ds.bam	-1
+pt1	cfDNA1	test_data/HG008_T_N-D_merged.chr22_10_15MB.ds01.ds05.bam	-1
